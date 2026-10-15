@@ -174,6 +174,32 @@ jobs:
           Get-Process | Where-Object { $_.Path -like '*Focus-Orb-Setup*' -or $_.Path -like '*old-uninstaller*' -or $_.Name -eq 'Focus Orb' } | Stop-Process -Force
           if ($after -eq $before) { throw "The update did not install: still $after. Left running: $left" }
 
+      # Something else briefly holding one of the app's files (security software checking
+      # it just after the app closed, say) while the update replaces them.
+      - name: Update while another program holds a file for 10 s
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $old = Get-ChildItem old\Focus-Orb-Setup-*.exe -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (-not $old) { exit 0 }
+          Start-Process $old.FullName -ArgumentList '/S' -Wait
+          $dir = Join-Path $env:LOCALAPPDATA 'Programs\focus-orb'
+          $exe = Join-Path $dir 'Focus Orb.exe'
+          $before = (Get-Item $exe).VersionInfo.ProductVersion
+          $held = Join-Path $dir 'LICENSE.electron.txt'
+          $holder = Start-Process pwsh -ArgumentList '-NoProfile','-Command',"`$f = [IO.File]::Open('$held','Open','Read','None'); Start-Sleep 10; `$f.Close()" -PassThru
+          Start-Sleep 1
+          $new = Get-ChildItem dist\Focus-Orb-Setup-*.exe | Select-Object -First 1
+          $t = [Diagnostics.Stopwatch]::StartNew()
+          $p = Start-Process $new.FullName -ArgumentList '/S','--updated' -PassThru
+          $hung = -not $p.WaitForExit(90000)
+          if ($hung) { Stop-Process -Id $p.Id -Force; Get-Process | Where-Object { $_.Path -like '*Focus-Orb-Setup*' -or $_.Path -like '*old-uninstaller*' } | Stop-Process -Force }
+          $after = if (Test-Path $exe) { (Get-Item $exe).VersionInfo.ProductVersion } else { 'nothing' }
+          $code = if ($hung) { 'none: stopped on a message box' } else { $p.ExitCode }
+          $msg = "From $before with a file held for 10 s: installer exit $code after $([int]$t.Elapsed.TotalSeconds) s; installed now $after"
+          Write-Output "::notice title=Locked-file update::$msg"
+          if ($hung -or $p.ExitCode -ne 0 -or $after -eq $before) { throw $msg }
+
       - name: What was built
         shell: bash
         run: |
