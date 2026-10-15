@@ -155,7 +155,7 @@ Each theme has its own end-of-session sound (a kitchen timer, wood blocks, a sin
 
 Until the app is code-signed, it can't check that an update really came from you: it trusts GitHub's HTTPS and the release page. Signing it closes that gap.
 
-**Releasing a version.** Bump `version` in `package.json`, commit, and push a matching tag (`v1.9.0`). The Windows workflow tests and builds as usual and then publishes the installer, the portable `.exe` and `latest.yml` to the Releases page, using the workflow's own GitHub permission: no token to create or renew. The repository is public so that installed copies can read the Releases page without a password.
+**Releasing a version.** Bump `version` in `package.json` and push to `main`. When the Windows workflow sees a version with no release yet, it tests and builds as usual and, only if everything passes, tags it (`v1.9.0`) and publishes the installer, the portable `.exe` and `latest.yml` to the Releases page, using the workflow's own GitHub permission: no token to create or renew. The repository is public so that installed copies can read the Releases page without a password.
 
 **By hand.** Install the new version over the old one with the installer, or replace the portable `.exe`. Settings and history live in `%APPDATA%\focus-orb` and are kept. With the browser link on, the app rewrites the extension's files on launch and the extension reloads itself once when it sees a newer version. Moving from 1.0.0 needs one manual Reload of the extension in `edge://extensions`.
 

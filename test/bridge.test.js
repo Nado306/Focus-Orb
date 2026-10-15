@@ -40,6 +40,12 @@ async function test(name, fn) {
   console.log('ok  -', name);
 }
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+// Wait for something to happen, up to a generous limit: build machines can be slow, and a
+// fixed pause long enough for the slowest would make every run slow.
+async function until(ok, ms = 5000) {
+  const end = Date.now() + ms;
+  while (!ok() && Date.now() < end) await wait(20);
+}
 
 // The extension's service worker in a sandbox, with a stubbed chrome and the real fetch.
 function extension({ port, tabNow, store = {}, version = '1.4.0', fetchVia } = {}) {
@@ -61,6 +67,7 @@ function extension({ port, tabNow, store = {}, version = '1.4.0', fetchVia } = {
     fetch: async (url, init) => {
       if (String(url).startsWith('chrome-extension://')) return { json: async () => ({ token: TOKEN, port }) };
       calls.push({ url: String(url).replace(/^http:\/\/127\.0\.0\.1:\d+/, ''), port: Number(/:(\d+)\//.exec(url)[1]), init });
+      if (process.env.FO_SLOW_MS) await wait(Number(process.env.FO_SLOW_MS)); // play a slow machine
       return (fetchVia || fetch)(url, init);
     },
   };
@@ -193,7 +200,7 @@ function extension({ port, tabNow, store = {}, version = '1.4.0', fetchVia } = {
     const p = await b.start();
     const ext = extension({ port: p });
     ext.listeners.activated();
-    await wait(400);
+    await until(() => got.length >= 1);
     assert.deepEqual(ext.calls.map((c) => c.url), ['/hello', '/tab']);
     assert.deepEqual(got, [{ url: 'https://www.youtube.com/watch?v=1', title: 'Funny cats - YouTube' }]);
     ext.calls.forEach((c) => {
@@ -207,7 +214,8 @@ function extension({ port, tabNow, store = {}, version = '1.4.0', fetchVia } = {
     assert.equal(ext.calls.length, 0, 'background tab changes are ignored');
     ext.listeners.updated(1, { title: 'Another title' }, { active: true });
     ext.listeners.focus(-1);
-    await wait(400);
+    await until(() => ext.calls.length >= 1);
+    await wait(400); // and nothing more arrives
     assert.deepEqual(ext.calls.map((c) => c.url), ['/tab'], 'debounced to one report, and no second proof needed so soon');
 
     ext.calls.length = 0;
@@ -240,7 +248,7 @@ function extension({ port, tabNow, store = {}, version = '1.4.0', fetchVia } = {
     assert.ok(p > taken);
     const ext = extension({ port: taken });
     ext.listeners.activated();
-    await wait(600);
+    await until(() => got.length >= 1);
     assert.deepEqual(heard.map((h) => h.path), ['/hello'], 'the impostor only ever saw a challenge');
     assert.ok(!JSON.stringify(heard).includes('youtube'), 'never the address');
     assert.ok(!JSON.stringify(heard).includes(TOKEN), 'never the secret');
@@ -274,7 +282,7 @@ function extension({ port, tabNow, store = {}, version = '1.4.0', fetchVia } = {
     const p = await b.start();
     const ext = extension({ port: p, tabNow: { id: 7, url: 'https://github.com/', title: 'GitHub', active: true } });
     ext.listeners.updated(9, { url: 'https://www.youtube.com/watch?v=1' }, { id: 9, active: false, title: '' });
-    await wait(200);
+    await until(() => ext.updates.length >= 1);
     assert.deepEqual(ext.calls.map((c) => c.url), ['/hello', '/check'], 'checked straight away, even in a background tab');
     assert.equal(ext.updates.length, 1);
     assert.equal(ext.updates[0][0], 9);
@@ -298,7 +306,7 @@ function extension({ port, tabNow, store = {}, version = '1.4.0', fetchVia } = {
     const p2 = await b2.start();
     const ext2 = extension({ port: p2, tabNow: { id: 3, url: 'https://www.youtube.com/', title: 'YouTube', active: true } });
     ext2.listeners.alarm();
-    await wait(450);
+    await until(() => ext2.updates.length >= 1);
     assert.deepEqual(ext2.updates.map((x) => x[0]), [3]);
     b.stop();
     b2.stop();
@@ -309,9 +317,10 @@ function extension({ port, tabNow, store = {}, version = '1.4.0', fetchVia } = {
       const b = createBridge({ getToken: () => TOKEN, basePort: 0, onTab: () => null, extVersion: () => expect });
       const p = await b.start();
       const ext = extension({ port: p, version: '1.0.0', store: { ...storeInit }, tabNow: { id: 1, url: 'https://example.com/', title: 'x', active: true } });
-      for (let i = 0; i < 3; i++) {
+      for (let i = 1; i <= 3; i++) {
         ext.listeners.alarm();
-        await wait(350);
+        await until(() => ext.calls.filter((c) => c.url === '/tab').length >= i);
+        await wait(50);
       }
       b.stop();
       return { reloads: ext.reloads(), store: ext.store };

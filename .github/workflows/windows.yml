@@ -8,21 +8,21 @@
 # 5. starts the built app, waits, and reads its log: it must still be running, its
 #    window watcher must be working, and nothing may have been logged as an error
 # 6. keeps both .exe files as downloads on the run's page for 30 days
-# 7. for a version tag (v1.9.0 and so on) only: publishes the installer, the portable
-#    .exe and latest.yml to this repository's Releases page, which is where installed
-#    copies look for updates.
+# 7. on main only, when package.json has a version with no release yet: publishes the
+#    installer, the portable .exe and latest.yml to this repository's Releases page
+#    (creating the v<version> tag), which is where installed copies look for updates.
+#    So releasing is: bump the version, push to main.
 
 name: Windows build
 
 on:
   push:
     branches: ['**']
-    tags: ['v*']
   pull_request:
   workflow_dispatch:
 
 permissions:
-  contents: write # only used to publish a release, and only for a version tag
+  contents: write # only used to publish a release: on main, for a version not yet released
 
 jobs:
   windows:
@@ -39,12 +39,20 @@ jobs:
       - name: Install
         run: npm ci
 
-      - name: A release tag must match the version in package.json
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: Is this version released yet?
+        id: release
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          want="v$(node -p "require('./package.json').version")"
-          [ "$want" = "$GITHUB_REF_NAME" ] || { echo "::error::Tag $GITHUB_REF_NAME but package.json says $want"; exit 1; }
+          v="v$(node -p "require('./package.json').version")"
+          echo "tag=$v" >> "$GITHUB_OUTPUT"
+          if gh release view "$v" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "new=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "new=true" >> "$GITHUB_OUTPUT"
+            echo "::notice title=New version::$v is not released yet; it will be published if this is main and every check passes"
+          fi
 
       - name: Tests
         shell: bash
@@ -113,13 +121,13 @@ jobs:
           retention-days: 30
 
       - name: Publish the release
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.release.outputs.new == 'true'
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          v="$GITHUB_REF_NAME"
-          gh release create "$v" \
+          v="${{ steps.release.outputs.tag }}"
+          gh release create "$v" --target "$GITHUB_SHA" \
             dist/Focus-Orb-Setup-*.exe dist/Focus-Orb-Setup-*.exe.blockmap dist/latest.yml dist/Focus-Orb-*-portable.exe \
             --repo "$GITHUB_REPOSITORY" \
             --title "Focus Orb ${v#v}" \
