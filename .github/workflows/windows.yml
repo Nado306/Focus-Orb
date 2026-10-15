@@ -155,9 +155,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $old = Get-ChildItem old\Focus-Orb-Setup-*.exe -ErrorAction SilentlyContinue | Select-Object -First 1
-          if (-not $old) { Write-Output '::notice::No previous release to update from'; exit 0 }
-          $latest = gh release view --repo $env:GITHUB_REPOSITORY --json tagName -q .tagName
+          # start from the release before the newest published one, so there is something to find
+          $tags = @(gh release list --repo $env:GITHUB_REPOSITORY --exclude-drafts --limit 20 --json tagName -q '.[].tagName')
+          if ($tags.Count -lt 2) { Write-Output '::notice::Fewer than two releases: nothing to update between'; exit 0 }
+          $latest = $tags[0]
+          gh release download $tags[1] --repo $env:GITHUB_REPOSITORY --pattern 'Focus-Orb-Setup-*.exe' --dir older
+          $old = Get-ChildItem older\Focus-Orb-Setup-*.exe | Select-Object -First 1
           Start-Process $old.FullName -ArgumentList '/S' -Wait
           $exe = Join-Path $env:LOCALAPPDATA 'Programs\focus-orb\Focus Orb.exe'
           $before = (Get-Item $exe).VersionInfo.ProductVersion
