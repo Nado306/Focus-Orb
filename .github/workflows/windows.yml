@@ -24,9 +24,9 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -36,12 +36,23 @@ jobs:
 
       - name: Tests
         shell: bash
-        run: npm test
+        run: npm test 2>&1 | tee test-output.txt; exit ${PIPESTATUS[0]}
 
       - name: Windows-only checks
-        run: node test/windows.test.js
+        shell: bash
+        run: node test/windows.test.js 2>&1 | tee -a test-output.txt; exit ${PIPESTATUS[0]}
         env:
           CI: 'true'
+
+      # Logs can be hard to reach from outside GitHub; an annotation is on the run's page
+      # and in the API, so a failure can always be read.
+      - name: Report failing tests
+        if: failure()
+        shell: bash
+        run: |
+          [ -f test-output.txt ] || exit 0
+          tail -n 60 test-output.txt | sed -e 's/%/%25/g' -e 's/\r//g' | awk 'BEGIN{ORS="%0A"} {print}' > tail.txt
+          echo "::error title=Test output (last 60 lines)::$(cat tail.txt)"
 
       - name: Build
         run: npx electron-builder --win --publish never
@@ -62,8 +73,18 @@ jobs:
           if ($text -notmatch 'Window watcher running') { throw 'The window watcher did not start' }
           if ($text -match ' error ') { throw 'Errors were logged' }
 
+      - name: Report the app's log
+        if: failure()
+        shell: pwsh
+        run: |
+          $log = Join-Path $env:APPDATA 'focus-orb\logs\focus-orb.log'
+          if (Test-Path $log) {
+            $t = (Get-Content $log -Tail 40) -join '%0A'
+            Write-Output "::error title=App log (last 40 lines)::$t"
+          }
+
       - name: Keep the installers
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: focus-orb-windows
           path: |
