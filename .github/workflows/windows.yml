@@ -105,6 +105,40 @@ jobs:
             Write-Output "::error title=App log (last 40 lines)::$t"
           }
 
+      # The update path for real: the previous release installed and running, then this
+      # build's installer run over it the way an update runs it. This is where "Failed to
+      # uninstall old application files" showed up, after Restart to update.
+      - name: Update over the previous release while it is running
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $prev = gh release list --repo $env:GITHUB_REPOSITORY --exclude-drafts --limit 20 --json tagName -q '.[].tagName' |
+            Where-Object { $_ -ne '${{ steps.release.outputs.tag }}' } | Select-Object -First 1
+          if (-not $prev) { Write-Output '::notice::No previous release to update from'; exit 0 }
+          gh release download $prev --repo $env:GITHUB_REPOSITORY --pattern 'Focus-Orb-Setup-*.exe' --dir old
+          $old = Get-ChildItem old\Focus-Orb-Setup-*.exe | Select-Object -First 1
+          Start-Process $old.FullName -ArgumentList '/S' -Wait
+          $exe = Join-Path $env:LOCALAPPDATA 'Programs\focus-orb\Focus Orb.exe'
+          if (-not (Test-Path $exe)) { throw "The previous release ($prev) did not install" }
+          $before = (Get-Item $exe).VersionInfo.ProductVersion
+          Start-Process $exe
+          Start-Sleep -Seconds 15
+          $running = @(Get-Process -Name 'Focus Orb' -ErrorAction SilentlyContinue).Count
+          $new = Get-ChildItem dist\Focus-Orb-Setup-*.exe | Select-Object -First 1
+          $t = [Diagnostics.Stopwatch]::StartNew()
+          $p = Start-Process $new.FullName -ArgumentList '/S','--updated' -PassThru
+          # a failed update stops on a message box nobody can click here, so give it 2 minutes
+          $hung = -not $p.WaitForExit(120000)
+          if ($hung) { Stop-Process -Id $p.Id -Force; Get-Process | Where-Object { $_.Path -like '*Focus-Orb-Setup*' -or $_.Path -like '*old-uninstaller*' } | Stop-Process -Force }
+          $code = if ($hung) { 'none: stopped on a message box' } else { $p.ExitCode }
+          $after = if (Test-Path $exe) { (Get-Item $exe).VersionInfo.ProductVersion } else { 'nothing' }
+          $msg = "From $prev ($before, $running processes running) to $($new.Name): installer exit $code after $([int]$t.Elapsed.TotalSeconds) s; installed now $after"
+          Write-Output "::notice title=Update test::$msg"
+          Get-Process -Name 'Focus Orb' -ErrorAction SilentlyContinue | Stop-Process -Force
+          if ($hung -or $p.ExitCode -ne 0) { throw "The update failed: $msg" }
+          if ($after -eq $before) { throw "Still the old version: $msg" }
+
       - name: What was built
         shell: bash
         run: |
