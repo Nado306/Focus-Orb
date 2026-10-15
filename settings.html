@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'">
+  <title>Focus Orb settings</title>
+  <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+  <div class="app">
+    <nav class="side" aria-label="Settings sections">
+      <h1>Settings</h1>
+      <a href="#timer" class="on">Timer</a>
+      <a href="#distraction">Distraction</a>
+      <a href="#alerts">Alerts</a>
+      <a href="#orb">Orb</a>
+      <a href="#keys">Keyboard</a>
+      <a href="#about">About</a>
+      <p class="saved" id="saved" aria-live="polite"></p>
+    </nav>
+
+    <main id="main">
+      <section id="timer">
+        <h2>Timer</h2>
+        <p class="note" id="profile-timing" hidden></p>
+        <div class="row"><div><b>Focus</b></div><label class="num"><input type="number" data-key="focus" min="5" max="180"> min</label></div>
+        <div class="row"><div><b>Short break</b></div><label class="num"><input type="number" data-key="short" min="1" max="60"> min</label></div>
+        <div class="row"><div><b>Long break</b></div><label class="num"><input type="number" data-key="long" min="1" max="90"> min</label></div>
+        <div class="row"><div><b>Long break after</b></div><label class="num"><input type="number" data-key="rounds" min="2" max="8"> sessions</label></div>
+        <div class="row"><div><b>Daily goal</b><span>0 turns it off.</span></div><label class="num"><input type="number" data-key="dailyGoal" min="0" max="20"> sessions</label></div>
+        <div class="row"><div><b>Start breaks by themselves</b></div><input type="checkbox" class="switch" data-key="autoBreak"></div>
+        <div class="row"><div><b>Start focus by itself</b><span>After a break, without a click.</span></div><input type="checkbox" class="switch" data-key="autoFocus"></div>
+      </section>
+
+      <section id="distraction">
+        <h2>Distraction</h2>
+        <p class="note warn" id="watcher" hidden></p>
+        <div class="row"><div><b>Watch for distractions</b></div><input type="checkbox" class="switch" data-key="distractEnabled"></div>
+        <div class="row"><div><b>Task profile</b><span>What counts as on task.</span></div>
+          <div class="pair"><select data-key="profileId" id="profiles"></select><button type="button" data-action="profiles">Edit…</button></div></div>
+        <div class="row"><div><b>Ask what I'm working on</b><span>When you start a session yourself.</span></div><input type="checkbox" class="switch" data-key="askIntent"></div>
+        <div class="row"><div><b>Off task after</b><span>How long before it counts as a drift.</span></div>
+          <select data-key="graceSec" data-num><option value="10">10 seconds</option><option value="20">20 seconds</option><option value="30">30 seconds</option><option value="60">1 minute</option></select></div>
+        <div class="row"><div><b>Away after</b><span>No keyboard or mouse.</span></div>
+          <select data-key="idleMin" data-num><option value="0">Never</option><option value="1">1 minute</option><option value="2">2 minutes</option><option value="5">5 minutes</option><option value="10">10 minutes</option></select></div>
+        <div class="row"><div><b>Window switching</b><span>How much hopping between apps is flagged.</span></div>
+          <div class="seg" data-key="switchLimit" data-num><button type="button" value="0">Ignore</button><button type="button" value="18">Relaxed</button><button type="button" value="12">Normal</button><button type="button" value="8">Strict</button></div></div>
+        <div class="row"><div><b>Calls</b></div>
+          <select data-key="meetingMode"><option value="neutral">Never judge them</option><option value="pause">Pause the timer</option><option value="off">Judge like any window</option></select></div>
+        <div class="row"><div><b>Pause when the screen locks</b></div><input type="checkbox" class="switch" data-key="pauseOnLock"></div>
+        <div class="row"><div><b>Nudge dings</b></div>
+          <div class="pair"><select data-key="nudgeDings" data-num><option value="0">None</option><option value="1">1 ding</option><option value="2">2 dings</option><option value="3">3 dings</option><option value="5">5 dings</option></select><button type="button" data-action="preview-dings" aria-label="Play the dings">Play</button></div></div>
+        <div class="row"><div><b>Nudge again</b><span>If you are still drifting.</span></div>
+          <select data-key="repeatSec" data-num><option value="30">Every 30 seconds</option><option value="60">Every minute</option><option value="90">Every 90 seconds</option><option value="180">Every 3 minutes</option></select></div>
+        <div class="row"><div><b>Browser link</b><span id="bridge-line">Real addresses for Edge and Chrome tabs.</span></div><button type="button" data-action="browser-link">Set up…</button></div>
+        <div class="row"><div><b>Block sites during focus</b><span id="block-line">Sites on the block list are turned away while a focus session runs. Breaks and detours are left alone.</span></div><input type="checkbox" class="switch" data-key="blockInFocus"></div>
+      </section>
+
+      <section id="alerts">
+        <h2>Alerts</h2>
+        <div class="row"><div><b>Chime</b><span>At the end of each session and break.</span></div>
+          <div class="pair"><input type="checkbox" class="switch" data-key="sound"><button type="button" data-action="preview-chime">Play</button></div></div>
+        <div class="row"><div><b>Desktop notifications</b></div><input type="checkbox" class="switch" data-key="notifications"></div>
+        <div class="row"><div><b>Notify when I drift</b><span>One notification when a drift starts.</span></div><input type="checkbox" class="switch" data-key="driftToast"></div>
+      </section>
+
+      <section id="orb">
+        <h2>Orb</h2>
+        <div class="row"><div><b>Size</b></div>
+          <div class="seg" data-key="scale" data-num><button type="button" value="0.75">Small</button><button type="button" value="1">Medium</button><button type="button" value="1.35">Large</button></div></div>
+        <div class="row col"><div><b>Theme</b><span>Choosing one plays its end-of-session sound.</span></div>
+          <div class="themes" id="themes"></div></div>
+        <div class="row"><div><b>Stay on top</b></div><input type="checkbox" class="switch" data-key="onTop"></div>
+        <div class="row"><div><b>Hide during full-screen apps</b><span>Games, videos and slideshows.</span></div><input type="checkbox" class="switch" data-key="hideFullscreen"></div>
+        <div class="row col" id="hide-row">
+          <div class="row-head"><div><b>Also hide for these apps</b><span>While one of them is the window in front, full screen or not.</span></div><button type="button" id="hide-add" aria-expanded="false" aria-controls="hide-picker">Add app…</button></div>
+          <ul class="chips" id="hide-apps" aria-label="Apps the orb hides for"></ul>
+          <div class="picker" id="hide-picker" hidden>
+            <div class="pick-head">Recently used</div>
+            <ul class="pick-list" id="hide-recent"></ul>
+            <form class="pick-type" id="hide-form"><input id="hide-name" type="text" maxlength="64" autocomplete="off" spellcheck="false" placeholder="Or type an app name, e.g. obs64" aria-label="App name"><button type="submit">Add</button></form>
+          </div>
+        </div>
+        <div class="row"><div><b>Start with Windows</b><span id="login-note"></span></div><input type="checkbox" class="switch" id="login"></div>
+      </section>
+
+      <section id="keys">
+        <h2>Keyboard</h2>
+        <div class="row"><div><b>Use keyboard shortcuts</b><span>Start or pause always works.</span></div><input type="checkbox" class="switch" data-key="shortcuts"></div>
+        <table class="keys" id="shortcut-table"></table>
+      </section>
+
+      <section id="about">
+        <h2>About</h2>
+        <div class="row"><div><b id="version">Focus Orb</b><span id="data-path"></span></div><button type="button" data-action="data-folder">Open data folder</button></div>
+        <div class="row"><div><b>Log</b><span>What the app did and any errors: no window titles or addresses. Send it along if something misbehaves.</span></div><button type="button" data-action="open-log">Show log</button></div>
+      </section>
+    </main>
+  </div>
+  <script src="settings.js"></script>
+</body>
+</html>

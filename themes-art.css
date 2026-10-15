@@ -1,0 +1,304 @@
+/*
+ * Themes that are not planets.
+ * - Each draws inside the 220 px stage, within 96 px of the centre, so the
+ *   window's round shape never clips it (test/main.smoke.test.js checks the shape,
+ *   and the render check in the README notes how the artwork was measured).
+ * - --frac is the share of the phase left (1 at the start, 0 at the end).
+ *   --el is the share used. Progress is drawn from these alone.
+ * - Phase colours come from --accent; drifting turns it amber, as everywhere else.
+ */
+#orb { --el: calc(1 - var(--frac, 1)); }
+
+.art, .art .a { display: none; }
+.theme-tomato .art, .theme-hourglass .art, .theme-candle .art, .theme-enso .art,
+.theme-seedling .art, .theme-ring .art, .theme-lava .art, .theme-tea .art, .theme-coffee .art {
+  display: block;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.theme-tomato .a-tomato, .theme-hourglass .a-hourglass, .theme-candle .a-candle, .theme-enso .a-enso,
+.theme-seedling .a-seedling, .theme-ring .a-ring, .theme-lava .a-lava, .theme-tea .a-tea, .theme-coffee .a-coffee {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.art svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+
+/* none of these have the planet or its orbit */
+:is(.theme-tomato, .theme-hourglass, .theme-candle, .theme-enso, .theme-seedling, .theme-ring, .theme-lava, .theme-tea, .theme-coffee) :is(.planet, .orbit, .glass) {
+  display: none;
+}
+/* the cycle dots sit below the artwork */
+:is(.theme-tomato, .theme-hourglass, .theme-candle, .theme-enso, .theme-seedling, .theme-ring, .theme-lava, .theme-tea, .theme-coffee) .dots { bottom: 22px; }
+#orb.idle .art .a, #orb.paused .art .a { filter: saturate(0.7) brightness(0.88); }
+.art .a { transition: filter 0.4s var(--ease); }
+
+/* Tall objects stand to the left, with the time beside them, so neither covers the other. */
+:is(.theme-hourglass, .theme-candle, .theme-lava) .art .a { transform-origin: 110px 110px; transform: translateX(-46px) scale(0.72); }
+:is(.theme-hourglass, .theme-candle, .theme-lava, .theme-seedling) .face { padding-left: 70px; }
+:is(.theme-hourglass, .theme-candle, .theme-lava, .theme-seedling) .time { font-size: 31px; }
+:is(.theme-hourglass, .theme-candle, .theme-lava, .theme-seedling) .hint { max-width: 86px; }
+/* the plant stands to the left too, a little larger than the others, its pot on the same line */
+.theme-seedling .art .a { transform-origin: 110px 110px; transform: translate(-50px, -14px) scale(0.92); }
+
+/* the planet's glow only where it suits the picture */
+:is(.theme-hourglass, .theme-candle, .theme-tea, .theme-lava) .glowwrap { display: none; }
+.theme-enso .glowwrap { opacity: 0.55; }
+.theme-seedling .glowwrap { display: none; }
+
+/* ===================== Tomato ===================== */
+.theme-tomato .phase-focus { --tom1: #ff8a6e; --tom2: #e5412d; --tom3: #8f1d14; --accent: #ff6a52; }
+.theme-tomato .phase-short { --tom1: #c8f08a; --tom2: #78c24a; --tom3: #2f6b22; --accent: #9fe070; --glow: rgba(150, 220, 100, 0.45); }
+.theme-tomato .phase-long  { --tom1: #ffe38a; --tom2: #f2b630; --tom3: #9a6a10; --accent: #ffcf5a; --glow: rgba(255, 200, 80, 0.45); }
+/* the face sits a little low, clear of the leaves */
+.theme-tomato .face { padding-top: 26px; }
+.tom-body {
+  position: absolute;
+  left: 42px; top: 52px; width: 136px; height: 128px;
+  border-radius: 50% 50% 47% 47% / 52% 52% 48% 48%;
+  background: radial-gradient(circle at 36% 32%, var(--tom1), var(--tom2) 55%, var(--tom3));
+  box-shadow: inset -14px -16px 28px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+}
+/* the time used, as a shadow sweeping round */
+.tom-wedge {
+  position: absolute; inset: 0;
+  background: conic-gradient(rgba(30, 0, 0, 0.34) calc(var(--el) * 360deg), transparent 0);
+}
+.tom-shine {
+  position: absolute; left: 22px; top: 22px; width: 34px; height: 18px; border-radius: 50%;
+  background: rgba(255, 255, 255, 0.32); transform: rotate(-32deg);
+}
+.tom-leaves { fill: #3fa35a; }
+.phase-short .tom-leaves { fill: #2f8a46; }
+.tom-stalk { fill: none; stroke: #2f7d44; stroke-width: 5; stroke-linecap: round; }
+#orb.drift .tom-body { box-shadow: inset -14px -16px 28px rgba(0, 0, 0, 0.35), 0 0 0 3px var(--accent); }
+
+/* ===================== Hourglass ===================== */
+.theme-hourglass .phase-focus { --sand: #f2b35c; --sand2: #d98a32; }
+.theme-hourglass .phase-short { --sand: #8ff0d0; --sand2: #3fbfa0; }
+.theme-hourglass .phase-long  { --sand: #c9b8ff; --sand2: #8a74f0; }
+.hg-glass { fill: rgba(255, 255, 255, 0.07); stroke: rgba(255, 255, 255, 0.45); stroke-width: 1.5; }
+.hg-cap { fill: #c9a37a; }
+.hg-sand { fill: var(--sand); transform-box: fill-box; transition: fill 0.6s; }
+.hg-sand-top { transform-origin: 50% 100%; transform: scaleY(var(--frac, 1)); }
+.hg-sand-bot { fill: var(--sand2); transform-origin: 50% 100%; transform: scaleY(var(--el)); }
+.hg-stream { stroke: var(--sand); stroke-width: 1.6; stroke-dasharray: 3 3; opacity: 0; }
+#orb.running .hg-stream { opacity: 1; animation: hg-fall 0.5s linear infinite; }
+@keyframes hg-fall { to { stroke-dashoffset: -6; } }
+#orb.drift .hg-stream { stroke: var(--accent); }
+#orb.drift .hg-glass { stroke: var(--accent); }
+/* turned over when a phase ends: it starts upside down and rights itself */
+.hg { transform-origin: 110px 110px; }
+#orb.flash .hg { animation: hg-flip 0.9s var(--ease) 1; }
+@keyframes hg-flip { from { transform: rotate(180deg); } 50% { transform: rotate(270deg) scale(0.74); } to { transform: rotate(360deg); } }
+
+/* ===================== Candle ===================== */
+.a-candle { --wax: calc(30px + 82px * var(--frac, 1)); }
+.cdl-plate {
+  position: absolute; left: 70px; width: 80px; top: 176px; height: 9px; border-radius: 5px;
+  background: linear-gradient(#9a7a55, #6b4f33);
+}
+.cdl-wax {
+  position: absolute; left: 86px; width: 48px; bottom: 44px; height: var(--wax); border-radius: 6px 6px 3px 3px;
+  background: linear-gradient(90deg, #e2d6c1, #fff7ea 48%, #cbbda4);
+}
+.cdl-drip { position: absolute; left: 6px; top: 0; width: 7px; height: 22px; border-radius: 0 0 4px 4px; background: #f6ecdc; }
+.cdl-flame {
+  position: absolute; left: 50%; width: 20px; height: 34px; margin-left: -10px;
+  bottom: calc(44px + var(--wax) + 4px);
+  transition: opacity 0.4s, transform 0.4s;
+  transform-origin: 50% 100%;
+}
+.cdl-flame::before {
+  content: ''; position: absolute; inset: 0; border-radius: 50% 50% 46% 46% / 62% 62% 38% 38%;
+  background: radial-gradient(circle at 50% 72%, #fffbe6 0 18%, #ffd36a 40%, rgba(255, 140, 40, 0.85) 66%, rgba(255, 120, 30, 0) 76%);
+}
+.cdl-flame i { position: absolute; left: 50%; bottom: -5px; width: 2px; height: 7px; margin-left: -1px; background: #2a2420; }
+.cdl-halo {
+  position: absolute; left: 50%; width: 92px; height: 92px; margin-left: -46px;
+  bottom: calc(44px + var(--wax) - 30px);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 190, 90, 0.32), rgba(255, 170, 60, 0) 68%);
+  transition: opacity 0.4s;
+}
+.phase-short .cdl-halo { background: radial-gradient(circle, rgba(120, 240, 200, 0.26), rgba(90, 230, 190, 0) 68%); }
+.phase-long .cdl-halo { background: radial-gradient(circle, rgba(180, 160, 255, 0.28), rgba(150, 130, 255, 0) 68%); }
+/* unlit until you start; low while paused */
+#orb.idle .cdl-flame { opacity: 0; }
+#orb.idle .cdl-halo { opacity: 0; }
+#orb.paused .cdl-flame { transform: scale(0.6); opacity: 0.7; }
+#orb.paused .cdl-halo { opacity: 0.4; }
+#orb.running .cdl-flame { animation: cdl-flicker 2.4s ease-in-out infinite; }
+@keyframes cdl-flicker {
+  0%, 100% { transform: scale(1) skewX(0); }
+  30% { transform: scale(1.04, 0.97) skewX(-2deg); }
+  60% { transform: scale(0.97, 1.05) skewX(2deg); }
+}
+/* drifting: the flame gutters */
+#orb.drift .cdl-flame { animation: cdl-gutter 0.5s ease-in-out infinite; filter: hue-rotate(-12deg) saturate(1.4); }
+#orb.drift .cdl-halo { background: radial-gradient(circle, rgba(255, 170, 60, 0.42), rgba(255, 170, 60, 0) 68%); }
+@keyframes cdl-gutter {
+  0%, 100% { transform: scale(0.9, 0.85) skewX(-10deg); }
+  50% { transform: scale(1.05, 1.1) skewX(9deg); }
+}
+
+/* ===================== Ensō ===================== */
+.theme-enso { --ink: #efe9df; }
+.theme-enso .phase-focus { --accent: #d9472b; --glow: rgba(217, 71, 43, 0.3); }
+.theme-enso .phase-short { --accent: #3fae8c; --glow: rgba(63, 174, 140, 0.3); }
+.theme-enso .phase-long  { --accent: #7a64d8; --glow: rgba(122, 100, 216, 0.3); }
+.en-paper { fill: rgba(255, 255, 255, 0.035); }
+.en-ghost { fill: none; stroke: rgba(255, 255, 255, 0.06); stroke-width: 14; }
+.en-ink { fill: none; stroke: var(--ink); stroke-linecap: round; }
+.en-ink-a { stroke-width: 13; stroke-dasharray: calc(var(--el) * 100) 200; opacity: 0.92; }
+.en-ink-b { stroke-width: 6; stroke-dasharray: calc(var(--el) * 97) 200; opacity: 0.5; }
+.en-seal-pos { transform-origin: 110px 110px; transform: rotate(calc(-100deg + 90deg + var(--el) * 360deg)); }
+.en-seal { fill: var(--accent); stroke: rgba(255, 255, 255, 0.25); stroke-width: 1; transition: fill 0.6s; }
+#orb.idle .en-seal-pos { opacity: 0.6; }
+#orb.drift .en-ink-a { stroke: #f4dcb8; }
+
+/* ===================== Seedling ===================== */
+.theme-seedling .phase-focus { --petal: #ff8fb0; --accent: #6fdc8c; --glow: rgba(110, 220, 140, 0.35); }
+.theme-seedling .phase-short { --petal: #ffd36a; }
+.theme-seedling .phase-long  { --petal: #b9a2ff; }
+.sd-pot { fill: #b5653c; }
+.sd-rim { fill: #c97546; }
+.sd-stem { fill: none; stroke: #4fae5c; stroke-width: 3.5; stroke-linecap: round; transform-box: fill-box; transform-origin: 50% 100%; }
+.sd-leaf { fill: #6fd07c; transform-box: fill-box; transition: transform 0.6s var(--ease), fill 0.6s; }
+.sd-l1 { transform-origin: 100% 100%; } .sd-l2 { transform-origin: 0 100%; fill: #85e090; }
+.sd-l3 { transform-origin: 100% 100%; } .sd-l4 { transform-origin: 0 100%; fill: #9cf0a6; }
+.sd-flower circle { fill: var(--petal); transition: fill 0.6s; }
+.sd-flower .sd-eye { fill: #ffe9a8; }
+.sd-flower { transform-box: fill-box; transform-origin: 50% 50%; transition: transform 0.8s var(--ease); }
+/* focus: it grows with the time spent; breaks show it grown, in flower */
+.phase-focus .sd-stem { transform: scaleY(clamp(0.15, calc(var(--el) * 1.2 + 0.15), 1)); }
+.phase-focus .sd-l1 { transform: scale(clamp(0, calc((var(--el) - 0.08) * 6), 1)); }
+.phase-focus .sd-l2 { transform: scale(clamp(0, calc((var(--el) - 0.3) * 6), 1)); }
+.phase-focus .sd-l3 { transform: scale(clamp(0, calc((var(--el) - 0.52) * 6), 1)); }
+.phase-focus .sd-l4 { transform: scale(clamp(0, calc((var(--el) - 0.72) * 6), 1)); }
+.phase-focus .sd-flower { transform: scale(clamp(0, calc((var(--el) - 0.94) * 16), 1)); }
+#orb.running .sd-plant { animation: sd-sway 6s ease-in-out infinite; }
+.sd-plant { transform-origin: 110px 156px; }
+@keyframes sd-sway { 0%, 100% { transform: rotate(-1.5deg); } 50% { transform: rotate(1.5deg); } }
+/* drifting: the leaves droop */
+#orb.drift .sd-leaf { fill: #b8c27a; }
+#orb.drift .sd-l1, #orb.drift .sd-l3 { transform: scale(clamp(0, calc((var(--el) - 0.08) * 6), 1)) rotate(-18deg); }
+#orb.drift .sd-l2, #orb.drift .sd-l4 { transform: scale(clamp(0, calc((var(--el) - 0.3) * 6), 1)) rotate(18deg); }
+
+/* ===================== Ring ===================== */
+.rg-face { fill: rgba(255, 255, 255, 0.03); r: 76px; }
+.rg-ticks line { stroke: rgba(255, 255, 255, 0.18); stroke-width: 1.5; stroke-linecap: round; }
+.rg-track { fill: none; stroke: rgba(255, 255, 255, 0.08); stroke-width: 9; }
+.rg-arc {
+  fill: none; stroke: var(--accent); stroke-width: 9; stroke-linecap: round;
+  stroke-dasharray: calc(var(--frac, 1) * 100) 200;
+  filter: drop-shadow(0 0 4px var(--accent));
+  transition: stroke 0.6s;
+}
+#orb.idle .rg-arc, #orb.paused .rg-arc { opacity: 0.6; }
+#orb.drift .rg-arc { animation: rg-pulse 1.2s ease-in-out infinite; }
+@keyframes rg-pulse { 50% { opacity: 0.55; } }
+
+/* ===================== Lava lamp ===================== */
+.theme-lava .phase-focus { --blob: #ff4fa3; --goo: #3a1b5e; }
+.theme-lava .phase-short { --blob: #4ff0c4; --goo: #10384a; }
+.theme-lava .phase-long  { --blob: #ffb14f; --goo: #3a1f12; }
+.theme-lava #orb.drift { --blob: #ffb347; }
+.lv-glass { fill: var(--goo); stroke: rgba(255, 255, 255, 0.25); stroke-width: 1.2; transition: fill 0.6s; }
+.lv-blob { fill: var(--blob); transition: fill 0.6s; animation: lv-rise 14s ease-in-out infinite; animation-play-state: paused; }
+.lv-b2 { animation-duration: 18s; animation-delay: -6s; }
+.lv-b3 { animation-name: lv-float; animation-duration: 11s; }
+.lv-b4 { animation-name: lv-float; animation-duration: 16s; animation-delay: -4s; }
+.lv-b5 { animation-name: lv-float; animation-duration: 9s; animation-delay: -2s; }
+#orb.running .lv-blob { animation-play-state: running; }
+@keyframes lv-rise { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-70px) scale(0.85, 1.1); } }
+@keyframes lv-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(36px) scale(1.15, 0.9); } }
+.lv-cap, .lv-base { fill: #9aa0ab; }
+.lv-slot { fill: rgba(0, 0, 0, 0.45); }
+/* the light in the base is the time left */
+.lv-light { fill: var(--blob); transform-box: fill-box; transform-origin: 0 50%; transform: scaleX(var(--frac, 1)); transition: fill 0.6s; }
+
+/* ===================== Tea ===================== */
+.theme-tea .phase-focus { --tea: #a8693a; --tea-top: #c4834d; }
+.theme-tea .phase-short { --tea: #7d9c52; --tea-top: #98b866; }
+.theme-tea .phase-long  { --tea: #9a4f5c; --tea-top: #b86672; }
+.tea-cup { fill: #ebe5da; }
+.tea-inside { fill: #2b2621; }
+.tea-handle { fill: none; stroke: #ebe5da; stroke-width: 9; stroke-linecap: round; }
+.tea-saucer { fill: none; stroke: #d7cfc1; stroke-width: 6; stroke-linecap: round; }
+/* focus drinks it down; a break pours it again */
+.tea-liquid { fill: var(--tea); transform-box: fill-box; transform-origin: 50% 100%; transition: fill 0.6s; }
+.phase-focus .tea-liquid { transform: scaleY(var(--frac, 1)); }
+.phase-short .tea-liquid, .phase-long .tea-liquid { transform: scaleY(max(0.06, var(--el))); }
+#orb.idle.phase-short .tea-liquid, #orb.idle.phase-long .tea-liquid { transform: scaleY(0.06); }
+.tea-steam path { fill: none; stroke: rgba(255, 255, 255, 0.4); stroke-width: 3.5; stroke-linecap: round; opacity: 0; }
+#orb.running .tea-steam path { animation: tea-steam 3.2s ease-in-out infinite; }
+#orb.running.phase-focus .tea-steam path { animation-duration: 4.5s; }
+.tea-steam path:nth-child(2) { animation-delay: -1.1s !important; }
+.tea-steam path:nth-child(3) { animation-delay: -2.2s !important; }
+@keyframes tea-steam { 0% { opacity: 0; transform: translateY(6px); } 40% { opacity: 0.8; } 100% { opacity: 0; transform: translateY(-10px); } }
+#orb.drift .tea-liquid { fill: #c98a3a; }
+#orb.drift .tea-cup { fill: #f2dcc0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .lv-blob, .tea-steam path, .sd-plant, .cdl-flame, .hg-stream, .hg, .rg-arc { animation: none !important; }
+  #orb.running .tea-steam path { opacity: 0.4; }
+}
+
+/* the daily count sits inside the circle for the round ones, clear of the stroke */
+:is(.theme-enso, .theme-ring) .goal { top: 50px; }
+/* the tea's text sits inside the cup, below the rim */
+.theme-tea .face { padding-top: 22px; }
+.theme-tea .time { font-size: 30px; }
+:is(.theme-enso, .theme-ring) .dots { bottom: 44px; }
+.theme-tea .time { font-size: 26px; }
+.theme-tea .hint { max-width: 84px; }
+
+/* The time sits on the page itself in these, so it gets a dark plate: white text is lost on a white page. */
+:is(.theme-hourglass, .theme-candle, .theme-lava, .theme-seedling) .face-text {
+  padding: 3px 11px 5px;
+  border-radius: 14px;
+  background: rgba(18, 18, 22, 0.66);
+}
+/* and the round ones get a solid middle for the same reason */
+.rg-face { fill: rgba(18, 18, 22, 0.66); }
+.en-paper { fill: rgba(18, 18, 22, 0.6); }
+
+/* ===================== Coffee =====================
+   A layered latte in a glass mug: foam, milk and espresso. You drink it down while you
+   focus (the layers sink together); a break pours another, with steam. */
+.theme-coffee .phase-focus { --foam: #f3e7d3; --milk: #c99a68; --shot: #4a2614; --accent: #d9935a; --glow: rgba(217, 147, 90, 0.3); }
+.theme-coffee .phase-short { --foam: #d9b48c; --milk: #8a5530; --shot: #2e160a; --accent: #c98b5a; }
+.theme-coffee .phase-long  { --foam: #f6efe2; --milk: #e2c49c; --shot: #7a4a28; --accent: #e6b980; }
+.theme-coffee #orb.drift { --accent: #ffb347; }
+.theme-coffee .glowwrap { display: none; }
+.cf-l1 { stop-color: var(--foam); } .cf-l2 { stop-color: var(--milk); } .cf-l3 { stop-color: var(--shot); }
+.cf-inside { fill: rgba(22, 18, 16, 0.82); }
+.cf-glass { fill: none; stroke: rgba(240, 236, 228, 0.85); stroke-width: 3; stroke-linecap: round; }
+.cf-handle { fill: none; stroke: rgba(240, 236, 228, 0.85); stroke-width: 6; stroke-linecap: round; }
+.cf-shine { stroke: rgba(255, 255, 255, 0.28); stroke-width: 4; stroke-linecap: round; }
+.cf-coaster { fill: #6b4a33; opacity: 0.9; }
+.cf-top { fill: var(--foam); opacity: 0.9; }
+.cf-drink { transform-box: fill-box; transform-origin: 50% 100%; }
+.phase-focus .cf-drink { transform: scaleY(max(0.04, var(--frac, 1))); }
+.phase-short .cf-drink, .phase-long .cf-drink { transform: scaleY(max(0.04, var(--el))); }
+#orb.idle:is(.phase-short, .phase-long) .cf-drink { transform: scaleY(0.04); }
+.cf-steam path { fill: none; stroke: rgba(255, 255, 255, 0.4); stroke-width: 3.5; stroke-linecap: round; opacity: 0; }
+#orb.running:is(.phase-short, .phase-long) .cf-steam path { animation: tea-steam 3s ease-in-out infinite; }
+.cf-steam path:nth-child(2) { animation-delay: -1s !important; }
+.cf-steam path:nth-child(3) { animation-delay: -2s !important; }
+/* drifting: the foam wobbles and the glass warms */
+#orb.drift .cf-top { animation: cf-slosh 0.9s ease-in-out infinite; fill: var(--accent); }
+#orb.drift .cf-glass, #orb.drift .cf-handle { stroke: var(--accent); }
+@keyframes cf-slosh { 50% { transform: translateY(2px) scaleX(0.92); } }
+.cf-top { transform-box: fill-box; transform-origin: 50% 50%; }
+/* the time sits inside the glass */
+.theme-coffee .face { padding-top: 26px; padding-right: 6px; }
+.theme-coffee .time { font-size: 26px; }
+.theme-coffee .face-text { text-shadow: 0 1px 5px rgba(20, 10, 4, 0.9); }
+.theme-coffee .hint { max-width: 66px; }
+@media (prefers-reduced-motion: reduce) { .cf-steam path, .cf-top { animation: none !important; } }

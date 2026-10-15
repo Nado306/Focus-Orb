@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'">
+  <title>Focus Orb browser link</title>
+  <link rel="stylesheet" href="extension.css">
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Browser link</h1>
+      <p class="lede">Window titles only tell the orb so much. This small Chrome and Edge extension tells it the address of your active tab, so a rule like <code>url:x.com</code> can't be fooled by a vague page title.</p>
+    </header>
+
+    <section class="status" aria-live="polite">
+      <div class="status-text">
+        <div class="k">Status <span class="chip" id="chip" hidden></span></div>
+        <div class="v" id="status">Checking…</div>
+      </div>
+      <button type="button" id="toggle" class="primary">Turn on</button>
+    </section>
+
+    <h2>Setting it up</h2>
+    <ol class="steps">
+      <li><span class="n">1</span><div>Turn the link on, then press <b>Open extension folder</b> below.</div></li>
+      <li><span class="n">2</span><div>Go to <code>edge://extensions</code> in Edge or <code>chrome://extensions</code> in Chrome, and switch on <b>Developer mode</b>.</div></li>
+      <li><span class="n">3</span><div>Choose <b>Load unpacked</b> and pick the folder that opened. It's called <b>Focus Orb link</b>.</div></li>
+      <li><span class="n">4</span><div>Within a few seconds the status above says <b>Connected</b>.</div></li>
+    </ol>
+
+    <h2>What it can see</h2>
+    <ul class="notes">
+      <li>The address and title of your active tab, sent only to <code>127.0.0.1</code>, this computer.</li>
+      <li>When you open a new address in any tab, it asks the orb whether to block it. The answer is only ever yes with Block sites during focus switched on in Settings.</li>
+      <li>The orb keeps them in memory for matching and never writes them to disk. A drift in the browser is recorded by the site's name, such as youtube.com, never the full address.</li>
+      <li>For a second browser, load the same folder.</li>
+    </ul>
+
+    <footer>
+      <button type="button" id="folder">Open extension folder</button>
+      <button type="button" id="token" class="ghost">Make a new secret</button>
+      <p id="msg" role="status"></p>
+    </footer>
+  </main>
+  <script src="extension.js"></script>
+</body>
+</html>

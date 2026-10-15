@@ -1,0 +1,71 @@
+# Builds and checks Focus Orb on a real Windows machine, on every push.
+#
+# 1. installs exactly what package-lock.json says
+# 2. runs the full test suite
+# 3. runs the Windows-only checks: the real Windows calls the window watcher makes,
+#    the watcher itself, and start with Windows through the real registry
+# 4. builds the installer and the portable .exe
+# 5. starts the built app, waits, and reads its log: it must still be running, its
+#    window watcher must be working, and nothing may have been logged as an error
+# 6. keeps both .exe files as downloads on the run's page for 30 days
+
+name: Windows build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Tests
+        shell: bash
+        run: npm test
+
+      - name: Windows-only checks
+        run: node test/windows.test.js
+        env:
+          CI: 'true'
+
+      - name: Build
+        run: npx electron-builder --win --publish never
+
+      - name: Start the built app and read its log
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem 'dist\win-unpacked\*.exe' | Select-Object -First 1
+          $app = Start-Process -FilePath $exe.FullName -PassThru
+          Start-Sleep -Seconds 20
+          $log = Join-Path $env:APPDATA 'focus-orb\logs\focus-orb.log'
+          if (Test-Path $log) { Get-Content $log } else { Write-Host 'No log file' }
+          if ($app.HasExited) { throw "The app quit by itself, exit code $($app.ExitCode)" }
+          Stop-Process -Id $app.Id -Force
+          if (-not (Test-Path $log)) { throw 'The app wrote no log' }
+          $text = Get-Content $log -Raw
+          if ($text -notmatch 'Focus Orb .* starting') { throw 'No start-up line in the log' }
+          if ($text -notmatch 'Window watcher running') { throw 'The window watcher did not start' }
+          if ($text -match ' error ') { throw 'Errors were logged' }
+
+      - name: Keep the installers
+        uses: actions/upload-artifact@v4
+        with:
+          name: focus-orb-windows
+          path: |
+            dist/*.exe
+          retention-days: 30

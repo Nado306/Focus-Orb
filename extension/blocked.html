@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Not now</title>
+  <link rel="icon" href="icon32.png">
+  <link rel="stylesheet" href="blocked.css">
+</head>
+<body>
+  <main>
+    <div class="orb" aria-hidden="true"><div class="ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" pathLength="100" id="arc"></circle></svg></div></div>
+    <h1 id="head">Not now.</h1>
+    <p class="lede" id="lede"><b id="site">This site</b> is on your block list, and you are in a focus session.</p>
+    <p class="time" id="time" hidden></p>
+    <div class="actions">
+      <button type="button" id="back" class="primary">Back</button>
+      <button type="button" id="open">Try again</button>
+    </div>
+    <p class="note" id="note">Need it? Right-click the orb, choose <b>Allow a detour</b>, then Try again.</p>
+    <p class="rule" id="rule"></p>
+  </main>
+  <script src="blocked.js"></script>
+</body>
+</html>

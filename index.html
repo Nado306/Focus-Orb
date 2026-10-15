@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:">
+  <title>Focus Orb</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="themes-art.css">
+  <link rel="stylesheet" href="themes-future.css">
+</head>
+<body>
+  <div id="stage">
+  <main id="orb" class="phase-focus idle" title="Click to start or pause. Drag to move. Right-click for options.">
+    <div class="glowwrap"><div class="glow"></div></div>
+
+    <!-- Themes that are not planets. Only the one matching the theme is shown.
+         Everything here sits inside 96 px of the centre, so the window's shape never clips it. -->
+    <div class="art" aria-hidden="true">
+      <div class="a a-tomato">
+        <div class="tom-body"><div class="tom-wedge"></div><div class="tom-shine"></div></div>
+        <svg class="tom-top" viewBox="0 0 220 220">
+          <path class="tom-leaves" d="M80 62 Q92 44 110 54 Q128 42 140 62 Q126 58 118 64 Q128 72 132 80 Q118 76 110 66 Q102 76 88 80 Q92 72 102 64 Q94 58 80 62Z"></path>
+          <path class="tom-stalk" d="M110 56 q1 -12 9 -17"></path>
+        </svg>
+      </div>
+
+      <svg class="a a-hourglass" viewBox="0 0 220 220">
+        <defs>
+          <clipPath id="hg-top"><path d="M78 44 C78 82 102 96 108 110 H112 C118 96 142 82 142 44 Z"></path></clipPath>
+          <clipPath id="hg-bot"><path d="M108 110 C102 124 78 138 78 176 H142 C142 138 118 124 112 110 Z"></path></clipPath>
+        </defs>
+        <g class="hg">
+          <path class="hg-glass" d="M78 44 C78 82 102 96 108 110 C102 124 78 138 78 176 H142 C142 138 118 124 112 110 C118 96 142 82 142 44 Z"></path>
+          <rect class="hg-sand hg-sand-top" clip-path="url(#hg-top)" x="70" y="58" width="80" height="52"></rect>
+          <rect class="hg-sand hg-sand-bot" clip-path="url(#hg-bot)" x="70" y="122" width="80" height="54"></rect>
+          <line class="hg-stream" x1="110" y1="108" x2="110" y2="176"></line>
+          <rect class="hg-cap" x="66" y="34" width="88" height="10" rx="4"></rect>
+          <rect class="hg-cap" x="66" y="176" width="88" height="10" rx="4"></rect>
+        </g>
+      </svg>
+
+      <div class="a a-candle">
+        <div class="cdl-halo"></div>
+        <div class="cdl-flame"><i></i></div>
+        <div class="cdl-wax"><i class="cdl-drip"></i></div>
+        <div class="cdl-plate"></div>
+      </div>
+
+      <svg class="a a-enso" viewBox="0 0 220 220">
+        <circle class="en-paper" cx="110" cy="110" r="70"></circle>
+        <circle class="en-ghost" cx="110" cy="110" r="78"></circle>
+        <g transform="rotate(-100 110 110)">
+          <circle class="en-ink en-ink-a" cx="110" cy="110" r="78" pathLength="100"></circle>
+          <circle class="en-ink en-ink-b" cx="110" cy="110" r="76" pathLength="100"></circle>
+        </g>
+        <g class="en-seal-pos"><rect class="en-seal" x="103" y="25" width="14" height="14" rx="2.5"></rect></g>
+      </svg>
+
+      <div class="a a-seedling">
+        <svg viewBox="0 0 220 220">
+          <g class="sd-plant">
+            <path class="sd-stem" d="M110 156 C110 140 107 128 111 104"></path>
+            <path class="sd-leaf sd-l1" d="M110 146 C96 144 88 136 86 126 C98 126 106 134 110 146Z"></path>
+            <path class="sd-leaf sd-l2" d="M110 136 C123 133 132 125 134 115 C121 116 113 124 110 136Z"></path>
+            <path class="sd-leaf sd-l3" d="M110 124 C99 121 92 114 91 106 C101 107 107 114 110 124Z"></path>
+            <path class="sd-leaf sd-l4" d="M111 114 C121 111 127 105 128 98 C119 99 113 105 111 114Z"></path>
+            <g class="sd-flower">
+              <circle cx="111" cy="98" r="5.5"></circle><circle cx="118" cy="103" r="5.5"></circle><circle cx="116" cy="111" r="5.5"></circle>
+              <circle cx="106" cy="111" r="5.5"></circle><circle cx="104" cy="103" r="5.5"></circle>
+              <circle class="sd-eye" cx="111" cy="105" r="4"></circle>
+            </g>
+          </g>
+          <path class="sd-pot" d="M82 160 H138 L132 184 H88 Z"></path>
+          <rect class="sd-rim" x="78" y="154" width="64" height="9" rx="3"></rect>
+        </svg>
+      </div>
+
+      <svg class="a a-ring" viewBox="0 0 220 220">
+        <circle class="rg-face" cx="110" cy="110" r="70"></circle>
+        <g class="rg-ticks"><line x1="110" y1="44" x2="110" y2="50" transform="rotate(0 110 110)"></line><line x1="110" y1="44" x2="110" y2="47" transform="rotate(30 110 110)"></line><line x1="110" y1="44" x2="110" y2="47" transform="rotate(60 110 110)"></line><line x1="110" y1="44" x2="110" y2="50" transform="rotate(90 110 110)"></line><line x1="110" y1="44" x2="110" y2="47" transform="rotate(120 110 110)"></line><line x1="110" y1="44" x2="110" y2="47" transform="rotate(150 110 110)"></line><line x1="110" y1="44" x2="110" y2="50" transform="rotate(180 110 110)"></line><line x1="110" y1="44" x2="110" y2="47" transform="rotate(210 110 110)"></line><line x1="110" y1="44" x2="110" y2="47" transform="rotate(240 110 110)"></line><line x1="110" y1="44" x2="110" y2="50" transform="rotate(270 110 110)"></line><line x1="110" y1="44" x2="110" y2="47" transform="rotate(300 110 110)"></line><line x1="110" y1="44" x2="110" y2="47" transform="rotate(330 110 110)"></line></g>
+        <circle class="rg-track" cx="110" cy="110" r="82"></circle>
+        <circle class="rg-arc" cx="110" cy="110" r="82" pathLength="100" transform="rotate(-90 110 110)"></circle>
+      </svg>
+
+      <div class="a a-lava">
+        <svg viewBox="0 0 220 220">
+          <defs><clipPath id="lv-glass"><path d="M86 44 H134 L152 160 H68 Z"></path></clipPath></defs>
+          <path class="lv-glass" d="M86 44 H134 L152 160 H68 Z"></path>
+          <g clip-path="url(#lv-glass)">
+            <circle class="lv-blob lv-b1" cx="100" cy="150" r="22"></circle>
+            <circle class="lv-blob lv-b2" cx="124" cy="160" r="18"></circle>
+            <ellipse class="lv-blob lv-b3" cx="114" cy="120" rx="12" ry="15"></ellipse>
+            <circle class="lv-blob lv-b4" cx="98" cy="96" r="8"></circle>
+            <circle class="lv-blob lv-b5" cx="118" cy="70" r="6"></circle>
+          </g>
+          <path class="lv-cap" d="M80 32 H140 L134 44 H86 Z"></path>
+          <path class="lv-base" d="M68 160 H152 L162 186 H58 Z"></path>
+          <rect class="lv-slot" x="78" y="171" width="64" height="4" rx="2"></rect>
+          <rect class="lv-light" x="78" y="171" width="64" height="4" rx="2"></rect>
+        </svg>
+      </div>
+
+      <div class="a a-tea">
+        <svg viewBox="0 0 220 220">
+          <defs><clipPath id="tea-in"><path d="M66 84 H148 L142 150 Q138 166 120 166 H94 Q76 166 72 150 Z"></path></clipPath></defs>
+          <g class="tea-steam">
+            <path d="M94 74 q-8 -10 0 -20 q8 -10 0 -20"></path>
+            <path d="M112 74 q-8 -10 0 -20 q8 -10 0 -20"></path>
+            <path d="M130 74 q-8 -10 0 -20 q8 -10 0 -20"></path>
+          </g>
+          <path class="tea-handle" d="M150 98 q28 0 25 24 q-3 20 -31 22"></path>
+          <path class="tea-cup" d="M60 80 H154 L147 152 Q142 174 120 174 H94 Q72 174 67 152 Z"></path>
+          <path class="tea-inside" d="M66 84 H148 L142 150 Q138 166 120 166 H94 Q76 166 72 150 Z"></path>
+          <rect class="tea-liquid" clip-path="url(#tea-in)" x="60" y="84" width="96" height="82"></rect>
+          <path class="tea-saucer" d="M46 178 Q110 192 174 178"></path>
+        </svg>
+      </div>
+      <div class="a a-coffee">
+        <svg viewBox="0 0 220 220">
+          <defs>
+            <clipPath id="cf-glass"><path d="M72 62 H142 V160 Q142 172 130 172 H84 Q72 172 72 160 Z"></path></clipPath>
+            <linearGradient id="cf-layers" x1="0" y1="0" x2="0" y2="1">
+              <stop class="cf-l1" offset="0"></stop><stop class="cf-l1" offset=".2"></stop>
+              <stop class="cf-l2" offset=".28"></stop><stop class="cf-l2" offset=".55"></stop>
+              <stop class="cf-l3" offset=".64"></stop><stop class="cf-l3" offset="1"></stop>
+            </linearGradient>
+          </defs>
+          <g class="cf-steam"><path d="M92 54 q-6 -7 0 -14 q6 -7 0 -14"></path><path d="M107 52 q-6 -7 0 -14 q6 -7 0 -14"></path><path d="M122 54 q-6 -7 0 -14 q6 -7 0 -14"></path></g>
+          <path class="cf-handle" d="M142 84 h10 q18 0 18 22 v14 q0 22 -18 22 h-10"></path>
+          <path class="cf-inside" d="M72 62 H142 V160 Q142 172 130 172 H84 Q72 172 72 160 Z"></path>
+          <g clip-path="url(#cf-glass)">
+            <g class="cf-drink"><rect x="70" y="66" width="74" height="106" fill="url(#cf-layers)"></rect><ellipse class="cf-top" cx="107" cy="66" rx="37" ry="4"></ellipse></g>
+          </g>
+          <path class="cf-glass" d="M72 58 V160 Q72 176 88 176 H126 Q142 176 142 160 V58"></path>
+          <path class="cf-shine" d="M80 70 V156"></path>
+          <ellipse class="cf-coaster" cx="107" cy="182" rx="56" ry="6"></ellipse>
+        </svg>
+      </div>
+      <!-- futuristic themes (styled in themes-future.css) -->
+      <div class="a a-reactor">
+        <div class="fx-back"></div>
+        <svg class="rx-ring rx-ring3" viewBox="0 0 220 220"><circle cx="110" cy="110" r="90"></circle></svg>
+        <svg class="rx-cells" viewBox="0 0 220 220"><circle cx="110" cy="110" r="80" transform="rotate(-90 110 110)"></circle></svg>
+        <div class="rx-lit"><svg class="rx-cells on" viewBox="0 0 220 220"><circle cx="110" cy="110" r="80" transform="rotate(-90 110 110)"></circle></svg></div>
+        <svg class="rx-ring rx-ring1" viewBox="0 0 220 220"><circle cx="110" cy="110" r="64"></circle></svg>
+        <svg class="rx-ring rx-ring2" viewBox="0 0 220 220"><circle cx="110" cy="110" r="54"></circle><path d="M110 51 l4 8 h-8z"></path></svg>
+        <div class="rx-core"></div>
+      </div>
+
+      <div class="a a-hologlobe">
+        <div class="fx-back"></div>
+        <svg viewBox="0 0 220 220">
+          <defs><clipPath id="hgl-c"><circle cx="110" cy="106" r="60"></circle></clipPath></defs>
+          <ellipse class="hgl-base" cx="110" cy="182" rx="44" ry="6"></ellipse>
+          <path class="hgl-beam" d="M70 182 L88 156 M150 182 L132 156"></path>
+          <g class="hgl-globe">
+            <circle class="hgl-sphere" cx="110" cy="106" r="60"></circle>
+            <g clip-path="url(#hgl-c)" class="hgl-lines">
+              <ellipse cx="110" cy="106" rx="60" ry="19"></ellipse><ellipse cx="110" cy="80" rx="53" ry="15"></ellipse><ellipse cx="110" cy="132" rx="53" ry="15"></ellipse>
+              <ellipse cx="110" cy="59" rx="33" ry="8"></ellipse><ellipse cx="110" cy="153" rx="33" ry="8"></ellipse>
+              <ellipse class="hgl-m" cx="110" cy="106" rx="60" ry="60"></ellipse>
+              <ellipse class="hgl-m m2" cx="110" cy="106" rx="60" ry="60"></ellipse>
+              <ellipse class="hgl-m m3" cx="110" cy="106" rx="60" ry="60"></ellipse>
+              <rect class="hgl-scan" x="40" y="96" width="140" height="20"></rect>
+            </g>
+          </g>
+          <circle class="hgl-track" cx="110" cy="106" r="78"></circle>
+          <circle class="hgl-arc" cx="110" cy="106" r="78" pathLength="100" transform="rotate(-90 110 106)"></circle>
+          <g class="hgl-sat"><circle cx="110" cy="28" r="3.2"></circle></g>
+        </svg>
+      </div>
+
+      <div class="a a-hexshield">
+        <div class="fx-back"></div>
+        <svg viewBox="0 0 220 220">
+          <defs>
+            <clipPath id="hx-clip"><circle cx="110" cy="110" r="78"></circle></clipPath>
+            <pattern id="hx-cells" width="17.32" height="30" patternUnits="userSpaceOnUse" patternTransform="translate(110 110)">
+              <path class="hx-cell" d="M8.66 0 L17.32 5 L17.32 15 L8.66 20 L0 15 L0 5 Z M8.66 20 L8.66 30"></path>
+            </pattern>
+          </defs>
+          <g clip-path="url(#hx-clip)">
+            <rect class="hx-charge" x="30" y="30" width="160" height="160"></rect>
+            <rect x="30" y="30" width="160" height="160" fill="url(#hx-cells)"></rect>
+            <g class="hx-sparks">
+              <path d="M101.3 140 L110 135 L118.7 140 L118.7 150 L110 155 L101.3 150Z"></path>
+              <path d="M75.4 155 L84 150 L92.7 155 L92.7 165 L84 170 L75.4 165Z"></path>
+              <path d="M127.3 155 L136 150 L144.7 155 L144.7 165 L136 170 L127.3 165Z"></path>
+              <path d="M136 110 L144.7 105 L153.3 110 L153.3 120 L144.7 125 L136 120Z"></path>
+            </g>
+            <path class="hx-crack" d="M60 70 L84 90 L78 104 L100 118 M84 90 L104 84 L118 96"></path>
+          </g>
+          <circle class="hx-rim" cx="110" cy="110" r="78"></circle>
+        </svg>
+      </div>
+
+      <div class="a a-warpgate">
+        <svg viewBox="0 0 220 220">
+          <defs>
+            <clipPath id="wg-clip"><circle cx="110" cy="110" r="76"></circle></clipPath>
+            <radialGradient id="wg-tunnel"><stop class="wg-s0" offset="0"></stop><stop class="wg-s1" offset=".18"></stop><stop class="wg-s2" offset=".55"></stop><stop class="wg-s3" offset="1"></stop></radialGradient>
+          </defs>
+          <g clip-path="url(#wg-clip)">
+            <circle cx="110" cy="110" r="76" fill="url(#wg-tunnel)"></circle>
+            <g class="wg-streaks">
+              <line x1="110" y1="94" x2="110" y2="36"></line><line x1="126" y1="110" x2="186" y2="110"></line><line x1="110" y1="126" x2="110" y2="186"></line><line x1="94" y1="110" x2="34" y2="110"></line>
+              <line x1="121" y1="99" x2="160" y2="60"></line><line x1="121" y1="121" x2="162" y2="162"></line><line x1="99" y1="121" x2="58" y2="162"></line><line x1="99" y1="99" x2="58" y2="58"></line>
+              <line x1="116" y1="95" x2="134" y2="44"></line><line x1="125" y1="116" x2="178" y2="134"></line><line x1="104" y1="125" x2="86" y2="178"></line><line x1="95" y1="104" x2="42" y2="86"></line>
+            </g>
+            <g class="wg-rings"><circle cx="110" cy="110" r="70"></circle><circle cx="110" cy="110" r="70"></circle><circle cx="110" cy="110" r="70"></circle></g>
+            <g class="wg-stars"><circle cx="128.0" cy="110.0" r="0.60"></circle><circle cx="130.5" cy="131.9" r="0.95"></circle><circle cx="107.1" cy="151.9" r="1.30"></circle><circle cx="68.0" cy="144.0" r="0.60"></circle><circle cx="44.6" cy="100.8" r="0.95"></circle><circle cx="99.7" cy="95.3" r="1.30"></circle><circle cx="116.2" cy="80.7" r="0.60"></circle><circle cx="146.0" cy="88.4" r="0.95"></circle><circle cx="161.9" cy="124.9" r="1.30"></circle><circle cx="140.0" cy="168.8" r="0.60"></circle><circle cx="103.8" cy="126.9" r="0.95"></circle><circle cx="82.4" cy="121.7" r="1.30"></circle><circle cx="71.6" cy="92.9" r="0.60"></circle><circle cx="92.4" cy="58.9" r="0.95"></circle><circle cx="141.0" cy="51.7" r="1.30"></circle><circle cx="127.4" cy="105.3" r="0.60"></circle><circle cx="135.4" cy="125.9" r="0.95"></circle><circle cx="118.0" cy="151.2" r="1.30"></circle><circle cx="78.3" cy="153.7" r="0.60"></circle><circle cx="44.5" cy="118.0" r="0.95"></circle><circle cx="96.2" cy="98.4" r="1.30"></circle><circle cx="108.4" cy="80.0" r="0.60"></circle></g>
+          </g>
+          <circle class="wg-frame" cx="110" cy="110" r="83"></circle>
+          <circle class="wg-chevrons" cx="110" cy="110" r="83"></circle>
+          <circle class="wg-arc" cx="110" cy="110" r="83" pathLength="100" transform="rotate(-90 110 110)"></circle>
+        </svg>
+      </div>
+
+      <div class="a a-dyson">
+        <div class="ds-star"></div>
+        <svg viewBox="0 0 220 220">
+          <g class="ds-orbit"><ellipse cx="110" cy="110" rx="84" ry="25" transform="rotate(-20 110 110)"></ellipse></g>
+          <g class="ds-shell">
+              <rect x="102.0" y="39.0" width="16" height="10" rx="1.5" transform="rotate(0.0 110.0 44.0)"></rect>
+              <rect x="127.3" y="44.0" width="16" height="10" rx="1.5" transform="rotate(22.5 135.3 49.0)"></rect>
+              <rect x="148.7" y="58.3" width="16" height="10" rx="1.5" transform="rotate(45.0 156.7 63.3)"></rect>
+              <rect x="163.0" y="79.7" width="16" height="10" rx="1.5" transform="rotate(67.5 171.0 84.7)"></rect>
+              <rect x="168.0" y="105.0" width="16" height="10" rx="1.5" transform="rotate(90.0 176.0 110.0)"></rect>
+              <rect x="163.0" y="130.3" width="16" height="10" rx="1.5" transform="rotate(112.5 171.0 135.3)"></rect>
+              <rect x="148.7" y="151.7" width="16" height="10" rx="1.5" transform="rotate(135.0 156.7 156.7)"></rect>
+              <rect x="127.3" y="166.0" width="16" height="10" rx="1.5" transform="rotate(157.5 135.3 171.0)"></rect>
+              <rect x="102.0" y="171.0" width="16" height="10" rx="1.5" transform="rotate(180.0 110.0 176.0)"></rect>
+              <rect x="76.7" y="166.0" width="16" height="10" rx="1.5" transform="rotate(202.5 84.7 171.0)"></rect>
+              <rect x="55.3" y="151.7" width="16" height="10" rx="1.5" transform="rotate(225.0 63.3 156.7)"></rect>
+              <rect x="41.0" y="130.3" width="16" height="10" rx="1.5" transform="rotate(247.5 49.0 135.3)"></rect>
+              <rect x="36.0" y="105.0" width="16" height="10" rx="1.5" transform="rotate(270.0 44.0 110.0)"></rect>
+              <rect x="41.0" y="79.7" width="16" height="10" rx="1.5" transform="rotate(292.5 49.0 84.7)"></rect>
+              <rect x="55.3" y="58.3" width="16" height="10" rx="1.5" transform="rotate(315.0 63.3 63.3)"></rect>
+              <rect x="76.7" y="44.0" width="16" height="10" rx="1.5" transform="rotate(337.5 84.7 49.0)"></rect>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+
+    <svg class="orbit" viewBox="0 0 220 220" aria-hidden="true">
+      <defs>
+        <clipPath id="clip-up"><rect x="-20" y="-20" width="260" height="130"></rect></clipPath>
+        <clipPath id="clip-down"><rect x="-20" y="110" width="260" height="130"></rect></clipPath>
+        <radialGradient id="moon-fill" cx="35%" cy="30%" r="75%">
+          <stop offset="0" stop-color="#ffffff"></stop>
+          <stop offset="0.55" stop-color="#ffe4d2"></stop>
+          <stop offset="1" stop-color="#c7a08f"></stop>
+        </radialGradient>
+      </defs>
+      <g transform="rotate(-22 110 110)">
+        <g clip-path="url(#clip-up)">
+          <path class="lane" d="M16 110A94 32 0 0 1 204 110A94 32 0 0 1 16 110"></path>
+          <path class="lit" pathLength="100" d="M16 110A94 32 0 0 1 204 110A94 32 0 0 1 16 110"></path>
+        </g>
+        <g class="moon-pos" id="moon-back"><circle class="moon" r="7"></circle></g>
+      </g>
+    </svg>
+
+    <div class="glass" aria-hidden="true">
+      <div class="liquid">
+        <svg class="wave slow" viewBox="0 0 336 20" preserveAspectRatio="none"><path d="M0 10Q21 0 42 10T84 10T126 10T168 10T210 10T252 10T294 10T336 10V20H0Z"></path></svg>
+        <svg class="wave" viewBox="0 0 336 20" preserveAspectRatio="none"><path d="M0 10Q21 20 42 10T84 10T126 10T168 10T210 10T252 10T294 10T336 10V20H0Z"></path></svg>
+      </div>
+    </div>
+    <div class="planet"></div>
+
+    <svg class="orbit" viewBox="0 0 220 220" aria-hidden="true">
+      <g transform="rotate(-22 110 110)">
+        <g clip-path="url(#clip-down)">
+          <path class="lane" d="M16 110A94 32 0 0 1 204 110A94 32 0 0 1 16 110"></path>
+          <path class="lit" pathLength="100" d="M16 110A94 32 0 0 1 204 110A94 32 0 0 1 16 110"></path>
+        </g>
+        <g class="moon-pos" id="moon-front"><circle class="moon" r="7"></circle></g>
+      </g>
+    </svg>
+
+    <div class="face">
+      <div class="face-text">
+        <div class="label" id="label">Focus</div>
+        <div class="time" id="time">25:00</div>
+        <div class="hint" id="hint">Click to start</div>
+      </div>
+    </div>
+    <div class="goal" id="goal" hidden></div>
+    <div class="dots" id="dots" aria-hidden="true"></div>
+  </main>
+  </div>
+  <script src="engine.js"></script>
+  <script src="renderer.js"></script>
+</body>
+</html>

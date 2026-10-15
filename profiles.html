@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'">
+  <title>Focus Orb profiles</title>
+  <link rel="stylesheet" href="profiles.css">
+</head>
+<body>
+  <div class="app">
+    <header class="top">
+      <div class="title">
+        <h1>Task profiles</h1>
+        <p>What counts as on task for each kind of work. Drift for a while and the orb turns amber and makes a quiet noise. That's the whole punishment.</p>
+      </div>
+      <section class="live" aria-live="polite" aria-label="Last window you used">
+        <div class="live-text">
+          <span class="k">Last window you used</span>
+          <span class="win" id="live-win">Nothing seen yet.</span>
+        </div>
+        <span class="chip" id="live-chip" hidden></span>
+        <div class="live-actions">
+          <button type="button" class="small" id="add-allow" disabled>Allow app</button>
+          <button type="button" class="small" id="add-block" disabled>Block app</button>
+          <button type="button" class="small" id="add-allow-site" hidden>Allow site</button>
+          <button type="button" class="small" id="add-block-site" hidden>Block site</button>
+        </div>
+      </section>
+      <details class="recent" id="recent-box">
+        <summary>Recent windows and how each was judged</summary>
+        <ol class="recent-list" id="recent"></ol>
+      </details>
+    </header>
+
+    <div class="body">
+      <nav class="side" aria-label="Profiles">
+        <div class="side-head">Profiles</div>
+        <ul id="list" class="list"></ul>
+        <div class="side-foot">
+          <button type="button" id="new" class="wide">+ New profile</button>
+          <div class="pair">
+            <button type="button" id="import" class="ghost">Import…</button>
+            <button type="button" id="export-all" class="ghost">Export all…</button>
+          </div>
+        </div>
+      </nav>
+
+      <main class="editor">
+        <div class="name-row">
+          <div class="field grow">
+            <label for="name">Name</label>
+            <input id="name" maxlength="40" autocomplete="off" spellcheck="false">
+          </div>
+          <div class="name-actions">
+            <button type="button" id="use">Use for sessions</button>
+            <button type="button" id="export-one" class="ghost">Export…</button>
+            <button type="button" id="del" class="ghost danger">Delete</button>
+          </div>
+        </div>
+
+        <fieldset class="timing">
+          <legend>Timings for this profile <span class="hint" id="timing-hint">Leave blank to use the usual ones.</span></legend>
+          <label class="t">Focus <input type="number" id="t-focus" min="5" max="180" step="5" inputmode="numeric"> <span>min</span></label>
+          <label class="t">Short break <input type="number" id="t-short" min="1" max="60" inputmode="numeric"> <span>min</span></label>
+          <label class="t">Long break <input type="number" id="t-long" min="1" max="90" step="5" inputmode="numeric"> <span>min</span></label>
+        </fieldset>
+
+        <div class="cols">
+          <div class="field">
+            <label for="allow">Allow <span class="count" id="allow-count"></span></label>
+            <textarea id="allow" spellcheck="false" placeholder="app:code&#10;github"></textarea>
+            <span class="hint">Empty means anything except what's blocked.</span>
+          </div>
+          <div class="field">
+            <label for="block">Block <span class="count" id="block-count"></span></label>
+            <textarea id="block" spellcheck="false" placeholder="youtube&#10;reddit"></textarea>
+            <span class="hint">Block always beats allow.</span>
+          </div>
+        </div>
+
+        <details class="help">
+          <summary>How rules work</summary>
+          <dl>
+            <dt><code>youtube</code></dt><dd>A plain word matches the app name or the window title.</dd>
+            <dt><code>app:code</code></dt><dd>Matches the app name exactly.</dd>
+            <dt><code>title:inbox</code></dt><dd>Matches the window title only.</dd>
+            <dt><code>url:x.com</code></dt><dd>Matches a site and its subdomains. Needs the browser link.</dd>
+          </dl>
+          <p>One rule per line. If Allow has any rules, anything that matches none of them counts as off task.</p>
+        </details>
+
+        <footer class="foot">
+          <p id="msg" role="status"></p>
+          <button type="button" id="save" class="primary">Save changes</button>
+        </footer>
+      </main>
+    </div>
+  </div>
+  <script src="profiles.js"></script>
+</body>
+</html>

@@ -1,0 +1,152 @@
+/*
+ * Futuristic themes: Reactor Core, Hologlobe, Hex Shield, Warp Gate, Dyson Sphere.
+ * Same rules as themes-art.css: everything stays within 96 px of the centre, progress
+ * comes from --frac (time left) and --el (time used), drifting turns --accent amber,
+ * and moving parts only move while the timer runs. Each sits on a dark disc so the
+ * time reads on a white page.
+ */
+:is(.theme-reactor, .theme-hologlobe, .theme-hexshield, .theme-warpgate, .theme-dyson) .art { display: block; position: absolute; inset: 0; pointer-events: none; }
+.theme-reactor .a-reactor, .theme-hologlobe .a-hologlobe, .theme-hexshield .a-hexshield, .theme-warpgate .a-warpgate, .theme-dyson .a-dyson {
+  display: block; position: absolute; inset: 0; width: 100%; height: 100%;
+}
+:is(.theme-reactor, .theme-hologlobe, .theme-hexshield, .theme-warpgate, .theme-dyson) :is(.planet, .orbit, .glass, .glowwrap) { display: none; }
+:is(.theme-reactor, .theme-hologlobe, .theme-hexshield, .theme-warpgate, .theme-dyson) .dots { bottom: 22px; }
+:is(.theme-reactor, .theme-hologlobe, .theme-hexshield, .theme-warpgate, .theme-dyson) .label { letter-spacing: 0.18em; text-transform: uppercase; font-size: 10px; }
+:is(.theme-reactor, .theme-hologlobe, .theme-hexshield, .theme-warpgate) .time { font-family: 'Cascadia Mono', 'Consolas', monospace; font-weight: 400; font-size: 30px; letter-spacing: 0; text-shadow: 0 0 8px var(--accent), 0 1px 4px rgba(0, 0, 0, 0.8); }
+.art .a svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.fx-back { position: absolute; inset: 18px; border-radius: 50%; background: radial-gradient(circle, rgba(6, 12, 22, 0.92) 55%, rgba(6, 12, 22, 0.75) 100%); }
+.fx-spin, .rx-ring, .hgl-sat, .wg-streaks, .wg-chevrons, .ds-shell, .ds-orbit { transform-origin: 110px 110px; }
+:is(.theme-reactor, .theme-hologlobe, .theme-hexshield, .theme-warpgate, .theme-dyson) #orb:not(.running) :is(.rx-ring, .rx-core, .hgl-m, .hgl-scan, .hx-sparks path, .wg-streaks, .wg-rings circle, .wg-chevrons, .ds-shell, .ds-orbit, .ds-star) { animation-play-state: paused !important; }
+@keyframes fx-spin { to { transform: rotate(360deg); } }
+@keyframes fx-rspin { to { transform: rotate(-360deg); } }
+
+/* ===================== Reactor Core ===================== */
+.theme-reactor .phase-focus { --accent: #38d6ff; }
+.theme-reactor .phase-short { --accent: #5effc4; }
+.theme-reactor .phase-long  { --accent: #b28bff; }
+.rx-ring circle, .rx-ring path { fill: none; stroke: var(--accent); }
+.rx-ring path { fill: color-mix(in srgb, var(--accent) 40%, white); stroke: none; }
+.rx-ring1 circle { stroke-width: 2; stroke-dasharray: 60 20 14 20; opacity: 0.8; }
+.rx-ring1 { animation: fx-rspin 9s linear infinite; }
+.rx-ring2 circle { stroke-width: 1; stroke-dasharray: 30 8; opacity: 0.6; }
+.rx-ring2 { animation: fx-spin 5s linear infinite; }
+.rx-ring3 circle { stroke-width: 1; stroke-dasharray: 2 6; opacity: 0.5; }
+.rx-ring3 { animation: fx-spin 30s linear infinite; }
+/* 40 cells round the outside; the lit ones are the time left */
+.rx-cells circle { fill: none; stroke: color-mix(in srgb, var(--accent) 22%, #06131f); stroke-width: 9; stroke-dasharray: 10.1 2.47; }
+.rx-cells.on circle { stroke: var(--accent); filter: drop-shadow(0 0 3px var(--accent)); }
+.rx-lit { position: absolute; inset: 0; -webkit-mask-image: conic-gradient(#000 0 calc(var(--frac, 1) * 360deg), transparent 0); mask-image: conic-gradient(#000 0 calc(var(--frac, 1) * 360deg), transparent 0); }
+.rx-core {
+  position: absolute; left: 66px; top: 66px; width: 88px; height: 88px; border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--accent) 30%, white) 0, var(--accent) 38%, color-mix(in srgb, var(--accent) 40%, transparent) 62%, transparent 72%);
+  opacity: 0.55; animation: rx-breathe 3s ease-in-out infinite;
+}
+@keyframes rx-breathe { 50% { transform: scale(1.07); opacity: 0.7; } }
+#orb.drift .rx-core { animation: rx-flicker 0.35s steps(2) infinite; }
+@keyframes rx-flicker { 50% { opacity: 0.25; } }
+
+/* ===================== Hologlobe ===================== */
+.theme-hologlobe .phase-focus { --accent: #2af5c8; }
+.theme-hologlobe .phase-short { --accent: #7fd4ff; }
+.theme-hologlobe .phase-long  { --accent: #c9a2ff; }
+.hgl-sphere { fill: color-mix(in srgb, var(--accent) 10%, transparent); stroke: var(--accent); stroke-width: 1.2; }
+.hgl-lines ellipse { fill: none; stroke: var(--accent); stroke-width: 0.8; opacity: 0.7; }
+.hgl-m { transform-box: fill-box; transform-origin: 50% 50%; animation: hgl-turn 6s linear infinite; }
+.hgl-m.m2 { animation-delay: -2s; }
+.hgl-m.m3 { animation-delay: -4s; }
+@keyframes hgl-turn { 0% { transform: scaleX(1); } 50% { transform: scaleX(0.02); } 100% { transform: scaleX(1); } }
+.hgl-scan { fill: color-mix(in srgb, var(--accent) 30%, transparent); stroke: none; animation: hgl-scan 3s ease-in-out infinite alternate; }
+@keyframes hgl-scan { from { transform: translateY(-58px); } to { transform: translateY(58px); } }
+.hgl-base { fill: var(--accent); opacity: 0.3; }
+.hgl-beam { stroke: var(--accent); stroke-width: 0.8; opacity: 0.4; }
+.hgl-track { fill: none; stroke: var(--accent); stroke-width: 2; opacity: 0.15; }
+.hgl-arc { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; stroke-dasharray: calc(var(--frac, 1) * 100) 200; }
+/* the satellite has done one orbit when the session ends */
+.hgl-sat { transform-origin: 110px 106px; transform: rotate(calc(var(--el) * 360deg)); }
+.hgl-sat circle { fill: color-mix(in srgb, var(--accent) 40%, white); filter: drop-shadow(0 0 3px var(--accent)); }
+#orb.drift .hgl-globe { animation: hgl-glitch 0.6s steps(3) infinite; }
+@keyframes hgl-glitch { 0% { transform: translateX(0); opacity: 1; } 33% { transform: translateX(-3px); opacity: 0.6; } 66% { transform: translateX(2px); opacity: 0.9; } }
+.theme-hologlobe .face { padding-bottom: 14px; }
+
+/* ===================== Hex Shield ===================== */
+.theme-hexshield .phase-focus { --accent: #b28bff; }
+.theme-hexshield .phase-short { --accent: #5effc4; }
+.theme-hexshield .phase-long  { --accent: #ff8ad8; }
+.hx-cell { fill: none; stroke: var(--accent); stroke-width: 0.9; opacity: 0.55; }
+/* the shield charges from the bottom up as you focus; a break shows it full */
+.hx-charge { fill: color-mix(in srgb, var(--accent) 38%, transparent); transform-box: fill-box; transform-origin: 50% 100%; }
+.phase-focus .hx-charge { transform: scaleY(var(--el)); }
+.hx-sparks path { fill: color-mix(in srgb, var(--accent) 50%, white); opacity: 0; animation: hx-spark 2.4s ease-in-out infinite; }
+.hx-sparks path:nth-child(2) { animation-delay: -0.8s; }
+.hx-sparks path:nth-child(3) { animation-delay: -1.6s; }
+.hx-sparks path:nth-child(4) { animation-delay: -2s; }
+@keyframes hx-spark { 50% { opacity: 0.7; } }
+.hx-rim { fill: none; stroke: color-mix(in srgb, var(--accent) 50%, white); stroke-width: 1.5; filter: drop-shadow(0 0 4px var(--accent)); }
+.hx-crack { fill: none; stroke: var(--accent); stroke-width: 1.6; stroke-linejoin: round; opacity: 0; }
+#orb.drift .hx-crack { opacity: 1; animation: hx-hit 1.2s ease-out infinite; }
+@keyframes hx-hit { 0% { opacity: 1; } 100% { opacity: 0.3; } }
+
+/* ===================== Warp Gate ===================== */
+.theme-warpgate .phase-focus { --accent: #ffd36a; --w0: #6aa6ff; --w1: #2f63c8; --w2: #142c6e; --w3: #05081a; }
+.theme-warpgate .phase-short { --accent: #7fc8ff; --w0: #0d1a3a; --w1: #0b1530; --w2: #070d22; --w3: #04060f; }
+.theme-warpgate .phase-long  { --accent: #ff9ad8; --w0: #1a0d2a; --w1: #140a22; --w2: #0b0616; --w3: #05030c; }
+.wg-s0 { stop-color: var(--w0); } .wg-s1 { stop-color: var(--w1); } .wg-s2 { stop-color: var(--w2); } .wg-s3 { stop-color: var(--w3); }
+.wg-streaks line { stroke: #d6ecff; stroke-width: 1.1; stroke-linecap: round; opacity: 0.7; }
+.wg-streaks { animation: fx-spin 10s linear infinite; }
+.wg-rings circle { fill: none; stroke: #8fd0ff; stroke-width: 1.4; transform-box: fill-box; transform-origin: 50% 50%; animation: wg-zoom 2.4s linear infinite; opacity: 0; }
+.wg-rings circle:nth-child(2) { animation-delay: -0.8s; }
+.wg-rings circle:nth-child(3) { animation-delay: -1.6s; }
+@keyframes wg-zoom { 0% { transform: scale(0.12); opacity: 0; } 25% { opacity: 0.85; } 100% { transform: scale(1.25); opacity: 0; } }
+/* breaks drop out of warp: no tunnel, just stars */
+.wg-stars circle { fill: #fff; opacity: 0; }
+:is(.phase-short, .phase-long) .wg-stars circle { opacity: 0.8; }
+:is(.phase-short, .phase-long) :is(.wg-streaks, .wg-rings) { display: none; }
+.wg-frame { fill: none; stroke: #2e3a52; stroke-width: 9; }
+.wg-chevrons { fill: none; stroke: color-mix(in srgb, var(--accent) 35%, #9ad7ff); stroke-width: 3; stroke-dasharray: 3 10; animation: fx-spin 24s linear infinite; }
+.wg-arc { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linecap: round; stroke-dasharray: calc(var(--frac, 1) * 100) 200; filter: drop-shadow(0 0 3px var(--accent)); }
+#orb.drift .wg-rings circle { animation-duration: 0.9s; stroke: var(--accent); }
+#orb.drift .wg-streaks { animation: wg-wobble 0.5s ease-in-out infinite alternate; }
+@keyframes wg-wobble { from { transform: rotate(-4deg) scale(0.97); } to { transform: rotate(4deg) scale(1.03); } }
+.theme-warpgate .face-text { text-shadow: 0 0 10px rgba(5, 8, 26, 0.95), 0 1px 3px rgba(5, 8, 26, 0.9); }
+
+/* ===================== Dyson Sphere ===================== */
+.theme-dyson .phase-focus { --star: #ffd36a; --accent: #ffb43c; }
+.theme-dyson .phase-short { --star: #8fd0ff; --accent: #5ab8ff; }
+.theme-dyson .phase-long  { --star: #ff8a6a; --accent: #ff6a52; }
+.ds-star {
+  position: absolute; left: 34px; top: 34px; width: 152px; height: 152px; border-radius: 50%;
+  background: radial-gradient(circle, #fffbe8 0, var(--star) 24%, color-mix(in srgb, var(--star) 55%, transparent) 46%, transparent 70%);
+  animation: rx-breathe 4s ease-in-out infinite;
+}
+.ds-shell rect { fill: #232b3b; stroke: #8fa3c8; stroke-width: 0.7; transition: opacity 0.8s var(--ease); }
+.ds-shell { animation: fx-spin 60s linear infinite; }
+.ds-orbit { animation: fx-rspin 40s linear infinite; }
+.ds-orbit ellipse { fill: none; stroke: #8fa3c8; stroke-width: 0.6; opacity: 0.45; }
+/* a panel every minute and a half of a 25-minute session; breaks show the shell closed and glowing */
+.phase-focus .ds-shell rect:nth-child(1) { opacity: clamp(0, calc((var(--el) * 16 - 0) * 3), 1); }
+.phase-focus .ds-shell rect:nth-child(2) { opacity: clamp(0, calc((var(--el) * 16 - 1) * 3), 1); }
+.phase-focus .ds-shell rect:nth-child(3) { opacity: clamp(0, calc((var(--el) * 16 - 2) * 3), 1); }
+.phase-focus .ds-shell rect:nth-child(4) { opacity: clamp(0, calc((var(--el) * 16 - 3) * 3), 1); }
+.phase-focus .ds-shell rect:nth-child(5) { opacity: clamp(0, calc((var(--el) * 16 - 4) * 3), 1); }
+.phase-focus .ds-shell rect:nth-child(6) { opacity: clamp(0, calc((var(--el) * 16 - 5) * 3), 1); }
+.phase-focus .ds-shell rect:nth-child(7) { opacity: clamp(0, calc((var(--el) * 16 - 6) * 3), 1); }
+.phase-focus .ds-shell rect:nth-child(8) { opacity: clamp(0, calc((var(--el) * 16 - 7) * 3), 1); }
+.phase-focus .ds-shell rect:nth-child(9) { opacity: clamp(0, calc((var(--el) * 16 - 8) * 3), 1); }
+.phase-focus .ds-shell rect:nth-child(10) { opacity: clamp(0, calc((var(--el) * 16 - 9) * 3), 1); }
+.phase-focus .ds-shell rect:nth-child(11) { opacity: clamp(0, calc((var(--el) * 16 - 10) * 3), 1); }
+.phase-focus .ds-shell rect:nth-child(12) { opacity: clamp(0, calc((var(--el) * 16 - 11) * 3), 1); }
+.phase-focus .ds-shell rect:nth-child(13) { opacity: clamp(0, calc((var(--el) * 16 - 12) * 3), 1); }
+.phase-focus .ds-shell rect:nth-child(14) { opacity: clamp(0, calc((var(--el) * 16 - 13) * 3), 1); }
+.phase-focus .ds-shell rect:nth-child(15) { opacity: clamp(0, calc((var(--el) * 16 - 14) * 3), 1); }
+.phase-focus .ds-shell rect:nth-child(16) { opacity: clamp(0, calc((var(--el) * 16 - 15) * 3), 1); }
+:is(.phase-short, .phase-long) .ds-shell rect { stroke: var(--star); filter: drop-shadow(0 0 2px var(--star)); }
+#orb.drift .ds-shell rect:nth-child(5) { animation: ds-loose 1.6s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 50% 50%; }
+@keyframes ds-loose { to { transform: translate(6px, -4px) rotate(25deg); } }
+#orb.drift .ds-star { animation: rx-flicker 0.5s steps(2) infinite; }
+.theme-dyson .face { color: #1e0f00; }
+.theme-dyson .face-text { text-shadow: 0 0 6px rgba(255, 245, 220, 0.9); }
+.theme-dyson .time { font-weight: 500; }
+
+@media (prefers-reduced-motion: reduce) {
+  :is(.rx-ring, .rx-core, .hgl-m, .hgl-scan, .hx-sparks path, .wg-streaks, .wg-rings circle, .wg-chevrons, .ds-shell, .ds-orbit, .ds-star, .hgl-globe) { animation: none !important; }
+}

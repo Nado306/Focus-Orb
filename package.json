@@ -1,0 +1,85 @@
+{
+  "name": "focus-orb",
+  "version": "1.8.0",
+  "description": "A floating Pomodoro focus orb for Windows",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "test": "node test/engine.test.js && node test/distraction.test.js && node test/stats.test.js && node test/bridge.test.js && node test/watcher.test.js && node test/startup.test.js && node test/log.test.js && node test/packaging.test.js && node test/main.smoke.test.js && NO_SHAPE=1 node test/main.smoke.test.js",
+    "dist": "electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "^44.7.2",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.focusorb.app",
+    "productName": "Focus Orb",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "preload-profiles.js",
+      "preload-stats.js",
+      "preload-intent.js",
+      "preload-extension.js",
+      "preload-settings.js",
+      "engine.js",
+      "distraction.js",
+      "stats.js",
+      "watcher.js",
+      "bridge.js",
+      "startup.js",
+      "winapi.js",
+      "log.js",
+      "index.html",
+      "style.css",
+      "themes-art.css",
+      "themes-future.css",
+      "renderer.js",
+      "profiles.html",
+      "profiles.css",
+      "profiles.js",
+      "stats.html",
+      "stats.css",
+      "stats-ui.js",
+      "intent.html",
+      "intent.css",
+      "intent.js",
+      "extension.html",
+      "extension.css",
+      "settings.html",
+      "settings.css",
+      "settings.js",
+      "extension.js",
+      "extension/**",
+      "assets/**"
+    ],
+    "win": {
+      "target": [
+        "portable",
+        "nsis"
+      ],
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false
+    },
+    "electronFuses": {
+      "runAsNode": false,
+      "enableNodeOptionsEnvironmentVariable": false,
+      "enableNodeCliInspectArguments": false,
+      "enableCookieEncryption": true,
+      "onlyLoadAppFromAsar": true,
+      "enableEmbeddedAsarIntegrityValidation": true
+    },
+    "asar": true
+  },
+  "dependencies": {
+    "koffi": "3.3.3"
+  }
+}

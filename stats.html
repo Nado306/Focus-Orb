@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'">
+  <title>Focus Orb stats</title>
+  <link rel="stylesheet" href="stats.css">
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Your focus</h1>
+      <button type="button" id="export">Export CSV</button>
+    </header>
+    <p class="last" id="last" hidden></p>
+
+    <section class="cards">
+      <div class="card"><div class="k">Today</div><div class="big" id="today">0</div><div class="sub" id="today-sub"></div></div>
+      <div class="card"><div class="k">This week</div><div class="big" id="week">0</div><div class="sub" id="week-sub"></div></div>
+      <div class="card"><div class="k">Streak</div><div class="big" id="streak">0</div><div class="sub" id="streak-sub"></div></div>
+      <div class="card"><div class="k">On task</div><div class="big" id="ontask">&ndash;</div><div class="sub">14-day average</div></div>
+    </section>
+
+    <section>
+      <h2>The week in review</h2>
+      <div class="review">
+        <div class="r-row">
+          <div class="r-k">This week against last</div>
+          <div class="r-v" id="r-compare"></div>
+        </div>
+        <div class="r-row">
+          <div class="r-k">When you focus best <span class="r-note">last 4 weeks</span></div>
+          <div class="r-v" id="r-best"></div>
+          <div class="slots" id="r-slots" role="img" aria-label="On-task figure by time of day"></div>
+        </div>
+        <div class="r-row">
+          <div class="r-k">Most time lost to, this week</div>
+          <div class="r-v" id="r-top"></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Last 14 days <span class="h2-note">Click a day to see it in full</span></h2>
+      <div class="chart" id="chart" role="group" aria-label="Focus minutes per day for the last 14 days"></div>
+      <div class="dayview" id="day" aria-live="polite" hidden>
+        <div class="day-head">
+          <h3 id="day-title"></h3>
+          <button type="button" class="close" id="day-close" aria-label="Close this day">×</button>
+        </div>
+        <div class="day-stats" id="day-stats"></div>
+        <div class="day-top" id="day-top"></div>
+        <div class="day-list" id="day-list"></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>What pulled you away</h2>
+      <ul class="list" id="top"></ul>
+    </section>
+
+    <section>
+      <h2>Recent sessions</h2>
+      <div class="table" id="recent"></div>
+    </section>
+    <p id="msg" role="status"></p>
+  </main>
+  <script src="stats-ui.js"></script>
+</body>
+</html>

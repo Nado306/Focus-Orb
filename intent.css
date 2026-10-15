@@ -1,0 +1,7 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; background: #1e2025; color: #ececf1; font: 13px/1.4 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif; overflow: hidden; }
+body { border: 1px solid #34363e; border-radius: 10px; padding: 11px 14px; }
+label { display: block; font-size: 12px; color: #9a9ca7; margin-bottom: 4px; }
+input { width: 100%; background: #16171b; color: inherit; border: 1px solid #34363e; border-radius: 8px; padding: 7px 10px; font: inherit; }
+input:focus-visible { outline: 2px solid #ff6a52; outline-offset: 1px; }
+.hint { margin-top: 5px; font-size: 11px; color: #7d7f8a; }
