@@ -51,8 +51,10 @@ jobs:
         shell: bash
         run: |
           [ -f test-output.txt ] || exit 0
-          tail -n 60 test-output.txt | sed -e 's/%/%25/g' -e 's/\r//g' | awk 'BEGIN{ORS="%0A"} {print}' > tail.txt
-          echo "::error title=Test output (last 60 lines)::$(cat tail.txt)"
+          # the last test that passed, then everything that is not a pass
+          last=$(grep '^ok  -' test-output.txt | tail -n 1)
+          grep -v '^ok  -' test-output.txt | tail -n 50 | sed -e 's/%/%25/g' -e 's/\r//g' | awk 'BEGIN{ORS="%0A"} {print}' > tail.txt
+          echo "::error title=Failing test output::After: ${last}%0A$(cat tail.txt)"
 
       - name: Build
         run: npx electron-builder --win --publish never
