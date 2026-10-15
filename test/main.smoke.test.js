@@ -8,6 +8,8 @@
  * This proves the wiring (names, message shapes, ordering). It does not prove
  * anything about real Windows, real PowerShell or real pixels.
  */
+// --no-shape runs the whole suite again as if the window shape were unavailable (works on every shell)
+if (process.argv.includes('--no-shape')) process.env.NO_SHAPE = '1';
 const assert = require('node:assert/strict');
 const Module = require('node:module');
 const fs = require('node:fs');

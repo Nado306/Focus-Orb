@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "start": "electron .",
-    "test": "node test/engine.test.js && node test/distraction.test.js && node test/stats.test.js && node test/bridge.test.js && node test/watcher.test.js && node test/startup.test.js && node test/log.test.js && node test/packaging.test.js && node test/main.smoke.test.js && NO_SHAPE=1 node test/main.smoke.test.js",
+    "test": "node test/engine.test.js && node test/distraction.test.js && node test/stats.test.js && node test/bridge.test.js && node test/watcher.test.js && node test/startup.test.js && node test/log.test.js && node test/packaging.test.js && node test/main.smoke.test.js && node test/main.smoke.test.js --no-shape",
     "dist": "electron-builder --win"
   },
   "devDependencies": {
