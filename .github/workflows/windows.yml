@@ -174,31 +174,51 @@ jobs:
           Get-Process | Where-Object { $_.Path -like '*Focus-Orb-Setup*' -or $_.Path -like '*old-uninstaller*' -or $_.Name -eq 'Focus Orb' } | Stop-Process -Force
           if ($after -eq $before) { throw "The update did not install: still $after. Left running: $left" }
 
-      # Something else briefly holding one of the app's files (security software checking
-      # it just after the app closed, say) while the update replaces them.
-      - name: Update while another program holds a file for 10 s
-        continue-on-error: true
+      # Something else holding one of the app's files (security software checking it just
+      # after the app closed, say) while an update replaces them. Three cases:
+      #   the last release's installer, file held 40 s: expected to fail as seen in use
+      #   this build's installer, file held 40 s: must succeed
+      #   this build's installer, file held throughout: must not stop on a message box
+      - name: Update while another program holds one of the app's files
         shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           $old = Get-ChildItem old\Focus-Orb-Setup-*.exe -ErrorAction SilentlyContinue | Select-Object -First 1
-          if (-not $old) { exit 0 }
-          Start-Process $old.FullName -ArgumentList '/S' -Wait
+          if (-not $old) { Write-Output '::notice::No previous release to update from'; exit 0 }
+          $latest = gh release view --repo $env:GITHUB_REPOSITORY --json tagName -q .tagName
+          gh release download $latest --repo $env:GITHUB_REPOSITORY --pattern 'Focus-Orb-Setup-*.exe' --dir released
+          $released = Get-ChildItem released\Focus-Orb-Setup-*.exe | Select-Object -First 1
+          $fixed = Get-ChildItem dist\Focus-Orb-Setup-*.exe | Select-Object -First 1
           $dir = Join-Path $env:LOCALAPPDATA 'Programs\focus-orb'
           $exe = Join-Path $dir 'Focus Orb.exe'
-          $before = (Get-Item $exe).VersionInfo.ProductVersion
-          $held = Join-Path $dir 'LICENSE.electron.txt'
-          $holder = Start-Process pwsh -ArgumentList '-NoProfile','-Command',"`$f = [IO.File]::Open('$held','Open','Read','None'); Start-Sleep 10; `$f.Close()" -PassThru
-          Start-Sleep 1
-          $new = Get-ChildItem dist\Focus-Orb-Setup-*.exe | Select-Object -First 1
-          $t = [Diagnostics.Stopwatch]::StartNew()
-          $p = Start-Process $new.FullName -ArgumentList '/S','--updated' -PassThru
-          $hung = -not $p.WaitForExit(90000)
-          if ($hung) { Stop-Process -Id $p.Id -Force; Get-Process | Where-Object { $_.Path -like '*Focus-Orb-Setup*' -or $_.Path -like '*old-uninstaller*' } | Stop-Process -Force }
-          $after = if (Test-Path $exe) { (Get-Item $exe).VersionInfo.ProductVersion } else { 'nothing' }
-          $code = if ($hung) { 'none: stopped on a message box' } else { $p.ExitCode }
-          $msg = "From $before with a file held for 10 s: installer exit $code after $([int]$t.Elapsed.TotalSeconds) s; installed now $after"
-          Write-Output "::notice title=Locked-file update::$msg"
-          if ($hung -or $p.ExitCode -ne 0 -or $after -eq $before) { throw $msg }
+          $note = Join-Path $env:APPDATA 'focus-orb\logs\installer-note.txt'
+          function Try-Update($installer, $holdSeconds) {
+            Get-Process | Where-Object { $_.Path -like "$dir*" } | Stop-Process -Force -ErrorAction SilentlyContinue
+            Start-Process $old.FullName -ArgumentList '/S' -Wait
+            Remove-Item $note -ErrorAction SilentlyContinue
+            $before = (Get-Item $exe).VersionInfo.FileVersion
+            $held = Join-Path $dir 'LICENSE.electron.txt'
+            $holder = Start-Process pwsh -ArgumentList '-NoProfile','-Command',"`$f = [IO.File]::Open('$held','Open','Read','None'); Start-Sleep $holdSeconds; `$f.Close()" -PassThru
+            Start-Sleep 2
+            $t = [Diagnostics.Stopwatch]::StartNew()
+            $p = Start-Process $installer.FullName -ArgumentList '/S','--updated' -PassThru
+            $hung = -not $p.WaitForExit(150000)
+            if ($hung) { Stop-Process -Id $p.Id -Force; Get-Process | Where-Object { $_.Path -like '*Focus-Orb-Setup*' -or $_.Path -like '*old-uninstaller*' } | Stop-Process -Force }
+            Stop-Process -Id $holder.Id -Force -ErrorAction SilentlyContinue
+            $after = if (Test-Path $exe) { (Get-Item $exe).VersionInfo.FileVersion } else { 'nothing' }
+            $code = if ($hung) { 'stopped on a message box' } else { "exit $($p.ExitCode)" }
+            $n = if (Test-Path $note) { (Get-Content $note) -join ' / ' } else { 'none' }
+            return @{ hung = $hung; code = $p.ExitCode; text = "$($installer.Name), file held $holdSeconds s: $code after $([int]$t.Elapsed.TotalSeconds) s; $before -> $after; installer note: $n"; ok = (-not $hung) -and $p.ExitCode -eq 0 -and (Test-Path $exe) }
+          }
+          $a = Try-Update $released 40
+          $b = Try-Update $fixed 40
+          $c = Try-Update $fixed 400
+          Write-Output "::notice title=Held file, last release::$($a.text)"
+          Write-Output "::notice title=Held file, this build::$($b.text)"
+          Write-Output "::notice title=Held file throughout, this build::$($c.text)"
+          if (-not $b.ok) { throw "This build failed with a file held for 40 s: $($b.text)" }
+          if ($c.hung) { throw "This build stopped on a message box with a file held throughout: $($c.text)" }
 
       - name: What was built
         shell: bash

@@ -1555,6 +1555,15 @@ if (!app.requestSingleInstanceLock()) {
     loadSettings();
     // Set to start with Windows, but pointing at another copy (an older portable .exe,
     // say)? Point it at this one, so the switch and what Windows does agree.
+    // what the installer had to say about the last update (build/installer.nsh writes it)
+    try {
+      const notePath = path.join(app.getPath('userData'), 'logs', 'installer-note.txt');
+      const note = fs.readFileSync(notePath, 'utf8').trim();
+      fs.unlinkSync(notePath);
+      note.split(/\r?\n/).filter(Boolean).forEach((line) => (/installed over the top/.test(line) ? log.warn(line) : log.info(line)));
+    } catch (err) {
+      /* no note: the last install had nothing to report */
+    }
     log.info(`Focus Orb ${app.getVersion()} starting`, { electron: process.versions.electron, windows: os.release(), packaged: app.isPackaged, exe: path.basename(thisExe()) });
     // Chromium reports processes ending cleanly, or being ended at shutdown, the same way
     // as crashes. Only real failures are errors; anything while quitting is ignored.

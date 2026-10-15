@@ -69,7 +69,8 @@
     "nsis": {
       "oneClick": true,
       "perMachine": false,
-      "artifactName": "Focus-Orb-Setup-${version}.${ext}"
+      "artifactName": "Focus-Orb-Setup-${version}.${ext}",
+      "include": "build/installer.nsh"
     },
     "electronFuses": {
       "runAsNode": false,
