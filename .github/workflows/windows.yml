@@ -9,8 +9,8 @@
 #    window watcher must be working, and nothing may have been logged as an error
 # 6. keeps both .exe files as downloads on the run's page for 30 days
 # 7. for a version tag (v1.9.0 and so on) only: publishes the installer, the portable
-#    .exe and latest.yml to the public Focus-Orb-releases repository, which is where
-#    installed copies look for updates. The code itself stays private.
+#    .exe and latest.yml to this repository's Releases page, which is where installed
+#    copies look for updates.
 
 name: Windows build
 
@@ -22,7 +22,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write # only used to publish a release, and only for a version tag
 
 jobs:
   windows:
@@ -116,13 +116,12 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         shell: bash
         env:
-          GH_TOKEN: ${{ secrets.RELEASES_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: |
-          [ -n "$GH_TOKEN" ] || { echo "::error::No RELEASES_TOKEN secret: see the README, Updates"; exit 1; }
           v="$GITHUB_REF_NAME"
           gh release create "$v" \
             dist/Focus-Orb-Setup-*.exe dist/Focus-Orb-Setup-*.exe.blockmap dist/latest.yml dist/Focus-Orb-*-portable.exe \
-            --repo Nado306/Focus-Orb-releases \
+            --repo "$GITHUB_REPOSITORY" \
             --title "Focus Orb ${v#v}" \
             --notes "Installed copies update themselves. For a fresh install, download Focus-Orb-Setup-${v#v}.exe; the portable copy is Focus-Orb-${v#v}-portable.exe."
           echo "::notice title=Released::Focus Orb ${v#v} is on the releases page"

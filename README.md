@@ -151,11 +151,11 @@ Each theme has its own end-of-session sound (a kitchen timer, wood blocks, a sin
 
 ## Updating
 
-**Automatic (installed copy).** Shortly after it starts, and every 4 hours, the installed app asks the public `Nado306/Focus-Orb-releases` repository for a newer version. If there is one, it downloads it in the background and installs it when you quit, or straight away if you choose Restart to update from the orb's menu. It never restarts on its own, so a focus session is never cut short. Settings…, About shows where it stands, with Check now; the switch there turns checking off. This is the only time the app contacts anything beyond your own computer.
+**Automatic (installed copy).** Shortly after it starts, and every 4 hours, the installed app asks this project's GitHub Releases page for a newer version. If there is one, it downloads it in the background and installs it when you quit, or straight away if you choose Restart to update from the orb's menu. It never restarts on its own, so a focus session is never cut short. Settings…, About shows where it stands, with Check now; the switch there turns checking off. This is the only time the app contacts anything beyond your own computer.
 
 Until the app is code-signed, it can't check that an update really came from you: it trusts GitHub's HTTPS and the release page. Signing it closes that gap.
 
-**Releasing a version.** Bump `version` in `package.json`, commit, and push a matching tag (`v1.9.0`). The Windows workflow tests and builds as usual and then publishes the installer, the portable `.exe` and `latest.yml` to `Focus-Orb-releases`. It needs a repository secret, `RELEASES_TOKEN`: a fine-grained GitHub token with Contents: Read and write on `Focus-Orb-releases` only. The source repository stays private.
+**Releasing a version.** Bump `version` in `package.json`, commit, and push a matching tag (`v1.9.0`). The Windows workflow tests and builds as usual and then publishes the installer, the portable `.exe` and `latest.yml` to the Releases page, using the workflow's own GitHub permission: no token to create or renew. The repository is public so that installed copies can read the Releases page without a password.
 
 **By hand.** 
 install the new version over the old one with the installer, or replace the portable `.exe`. Settings and history live in `%APPDATA%\focus-orb` and are kept. With the browser link on, the app rewrites the extension's files on launch and the extension reloads itself once when it sees a newer version. Moving from 1.0.0 needs one manual Reload of the extension in `edge://extensions`.
