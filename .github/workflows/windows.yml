@@ -139,6 +139,41 @@ jobs:
           if ($hung -or $p.ExitCode -ne 0) { throw "The update failed: $msg" }
           if ($after -eq $before) { throw "Still the old version: $msg" }
 
+      # The whole update the way the app does it: the previous release finds the latest
+      # release on its own, downloads it, and installs it as it quits.
+      - name: Update the way the app does it
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $old = Get-ChildItem old\Focus-Orb-Setup-*.exe -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (-not $old) { Write-Output '::notice::No previous release to update from'; exit 0 }
+          $latest = gh release view --repo $env:GITHUB_REPOSITORY --json tagName -q .tagName
+          Start-Process $old.FullName -ArgumentList '/S' -Wait
+          $exe = Join-Path $env:LOCALAPPDATA 'Programs\focus-orb\Focus Orb.exe'
+          $before = (Get-Item $exe).VersionInfo.ProductVersion
+          $log = Join-Path $env:APPDATA 'focus-orb\logs\focus-orb.log'
+          Remove-Item $log -ErrorAction SilentlyContinue
+          Start-Process $exe
+          # it checks 30 s after starting; wait for "Update ready"
+          $ready = $false
+          for ($i = 0; $i -lt 60 -and -not $ready; $i++) { Start-Sleep 3; $ready = (Test-Path $log) -and ((Get-Content $log -Raw) -match 'Update ready') }
+          $lines = if (Test-Path $log) { (Get-Content $log | Select-Object -Last 12) -join '%0A' } else { 'no log' }
+          if (-not $ready) { Write-Output "::error title=App log::$lines"; throw "The app did not get an update ready (from $before, latest release $latest)" }
+          # close it the ordinary way (no force), as quitting does; it installs on the way out
+          taskkill /IM "Focus Orb.exe" | Out-Null
+          $done = $false
+          for ($i = 0; $i -lt 60 -and -not $done; $i++) {
+            Start-Sleep 2
+            $inst = Get-Process | Where-Object { $_.Path -like '*Focus-Orb-Setup*' -or $_.Path -like '*old-uninstaller*' -or $_.Name -eq 'Focus Orb' }
+            $done = -not $inst -and ((Get-Item $exe -ErrorAction SilentlyContinue).VersionInfo.ProductVersion -ne $before)
+          }
+          $after = if (Test-Path $exe) { (Get-Item $exe).VersionInfo.ProductVersion } else { 'nothing' }
+          $left = (Get-Process | Where-Object { $_.Path -like '*Focus-Orb-Setup*' -or $_.Path -like '*old-uninstaller*' -or $_.Name -eq 'Focus Orb' } | ForEach-Object { "$($_.Name) [$($_.Path)]" }) -join '; '
+          Write-Output "::notice title=App-driven update::From $before (latest release $latest): installed now $after. Still running: $(if ($left) { $left } else { 'nothing' })%0A$lines"
+          Get-Process | Where-Object { $_.Path -like '*Focus-Orb-Setup*' -or $_.Path -like '*old-uninstaller*' -or $_.Name -eq 'Focus Orb' } | Stop-Process -Force
+          if ($after -eq $before) { throw "The update did not install: still $after. Left running: $left" }
+
       - name: What was built
         shell: bash
         run: |
