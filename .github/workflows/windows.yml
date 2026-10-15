@@ -77,7 +77,16 @@ jobs:
           echo "::error title=Failing test output::After: ${last}%0A$(cat tail.txt)"
 
       - name: Build
-        run: npx electron-builder --win --publish never
+        shell: bash
+        run: npx electron-builder --win --publish never 2>&1 | tee build-output.txt; exit ${PIPESTATUS[0]}
+
+      - name: Report a failed build
+        if: failure()
+        shell: bash
+        run: |
+          [ -f build-output.txt ] || exit 0
+          grep -v '^\s*$' build-output.txt | tail -n 40 | sed -e 's/%/%25/g' -e 's/\r//g' | awk 'BEGIN{ORS="%0A"} {print}' > tail.txt
+          echo "::error title=Build output::$(cat tail.txt)"
 
       - name: Start the built app and read its log
         shell: pwsh

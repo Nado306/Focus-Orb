@@ -60,7 +60,8 @@
       Sleep 5000
       IntOp $R6 $R6 + 1
       ClearErrors
-      ExecWait '"$uninstallerFileNameTemp" /S /KEEP_APP_DATA /currentuser --updated _?=$installationDir' $R0
+      ; electron-builder copies the old uninstaller here before running it (installUtil.nsh)
+      ExecWait '"$PLUGINSDIR\old-uninstaller.exe" /S /KEEP_APP_DATA /currentuser --updated _?=$INSTDIR' $R0
       ${if} $R0 == 0
         !insertmacro FO_NOTE "Update: the old version's files were in use at first; removed on try $R6."
         Goto fo_done
