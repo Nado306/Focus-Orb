@@ -22,6 +22,7 @@ const os = require('os');
 const { execFile } = require('child_process');
 const { createStartup } = require('./startup.js');
 const { createLog } = require('./log.js');
+const U = require('./updater.js');
 const E = require('./engine.js');
 const D = require('./distraction.js');
 const S = require('./stats.js');
@@ -52,6 +53,7 @@ const DEFAULTS = {
   shortcuts: true,
   hideFullscreen: true,
   hideApps: [], // process names, e.g. 'obs64': the orb hides while one of these is in front
+  autoUpdate: true, // the installed copy checks for, downloads and installs new versions
   // distraction
   distractEnabled: true,
   nudgeDings: 3,
@@ -237,6 +239,7 @@ function update(patch) {
   if ('onTop' in patch) win.setAlwaysOnTop(settings.onTop, 'screen-saver');
   if ('shortcuts' in patch) applyShortcuts();
   if ('hideFullscreen' in patch || 'hideApps' in patch) fullscreenCheck(currentWin);
+  if ('autoUpdate' in patch) applyUpdates();
   pushSettings();
   if (auxWins.settings) auxWins.settings.webContents.send('settings:changed', settingsSnapshot());
 }
@@ -986,6 +989,7 @@ const SETTING_RULES = {
   onTop: ['bool'],
   hideFullscreen: ['bool'],
   hideApps: ['apps'],
+  autoUpdate: ['bool'],
   shortcuts: ['bool'],
   profileId: ['profile'],
 };
@@ -1018,6 +1022,44 @@ function cleanPatch(patch) {
     if (kind === 'apps' && Array.isArray(v)) out[k] = cleanApps(v);
   });
   return out;
+}
+
+/* ---------- updates ---------- */
+
+// Only the installed copy updates itself: the portable .exe is replaced by hand.
+const canUpdate = () => app.isPackaged && process.platform === 'win32' && !process.env.PORTABLE_EXECUTABLE_FILE;
+let updater = null;
+let toldReady = '';
+
+function updateState() {
+  if (updater && settings.autoUpdate) return updater.state();
+  if (!app.isPackaged) return { status: 'off', why: 'Only in the installed app.' };
+  if (process.env.PORTABLE_EXECUTABLE_FILE) return { status: 'off', why: 'The portable copy is updated by hand: download the new one.' };
+  return { status: 'off', why: 'Off. Switch on to check for new versions.' };
+}
+
+function applyUpdates() {
+  if (!canUpdate()) return;
+  if (!settings.autoUpdate) {
+    if (updater) updater.stop();
+    return;
+  }
+  if (!updater) {
+    // eslint-disable-next-line global-require
+    const { autoUpdater } = require('electron-updater');
+    updater = U.createUpdater({
+      autoUpdater,
+      log,
+      onChange: (st) => {
+        if (st.status === 'ready' && toldReady !== st.version) {
+          toldReady = st.version;
+          notify(`Focus Orb ${st.version} is ready`, 'It installs when you quit. Or right-click the orb: Restart to update.');
+        }
+        if (auxWins.settings) auxWins.settings.webContents.send('settings:changed', settingsSnapshot());
+      },
+    });
+  }
+  updater.start();
 }
 
 /* ---------- start with Windows ---------- */
@@ -1076,6 +1118,9 @@ function settingsSnapshot() {
     bridge: { on: !!settings.bridgeOn, seen: tabIndex.latest() },
     recentApps: [...recentApps].reverse().map(([name, title]) => ({ name, title })),
     version: app.getVersion(),
+    updateLine: U.describe(updateState(), app.getVersion()),
+    updateReady: updateState().status === 'ready',
+    canUpdate: canUpdate(),
     packaged: app.isPackaged,
     startWithWindows: canStartup() && startupState.on,
     startupNote: startupNote(),
@@ -1111,11 +1156,13 @@ function buildMenu() {
   ];
 
   const issues = healthIssues().map((i) => ({ label: `\u26a0 ${i.title}`, enabled: false }));
+  const ready = updateState().status === 'ready';
   const quick = quickRule();
   const started = uiState.started;
   const inBreak = uiState.phase !== 'focus';
   return Menu.buildFromTemplate([
     ...(issues.length ? [...issues, { type: 'separator' }] : []),
+    ...(ready ? [{ label: `Restart to update (${updateState().version})`, click: () => updater && updater.install() }, { type: 'separator' }] : []),
     // no shortcut column: it doubled the menu's width (the keys are listed in Settings, Keyboard)
     { label: toggleLabel, click: () => send('toggle') },
     // ends a focus session now and counts it; ends a break early
@@ -1443,6 +1490,8 @@ function wireIpc() {
       log.info(`Start with Windows switched ${value ? 'on' : 'off'}`, { nowOn: startupState.on, thisCopy: startupState.here });
     }
     else if (what === 'open-log') shell.showItemInFolder(log.file);
+    else if (what === 'check-updates' && updater) updater.check();
+    else if (what === 'install-update' && updater) updater.install();
     else return null;
     return settingsSnapshot();
   });
@@ -1520,6 +1569,7 @@ if (!app.requestSingleInstanceLock()) {
     app.on('before-quit', () => {
       quitting = true;
     });
+    applyUpdates();
     if (canStartup()) {
       startup
         .follow()
@@ -1573,6 +1623,7 @@ if (!app.requestSingleInstanceLock()) {
     quitting = true;
     log.info('Quitting');
     clearInterval(pollTimer);
+    if (updater) updater.stop();
     clearInterval(hitTimer);
     clearInterval(dragTimer);
     clearTimeout(watcherTimer);

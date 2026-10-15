@@ -19,8 +19,8 @@ npm run dist
 
 Output lands in `dist/`:
 
-- `Focus Orb <version>.exe` is a portable build. Copy it anywhere and run it.
-- `Focus Orb Setup <version>.exe` is a one-click installer (per user, no admin rights).
+- `Focus-Orb-<version>-portable.exe` is a portable build. Copy it anywhere and run it. It does not update itself.
+- `Focus-Orb-Setup-<version>.exe` is a one-click installer (per user, no admin rights). The installed copy updates itself.
 
 The first build downloads Electron and the Windows packaging tools, so it needs internet and takes a minute or two.
 
@@ -151,7 +151,14 @@ Each theme has its own end-of-session sound (a kitchen timer, wood blocks, a sin
 
 ## Updating
 
-Install the new version over the old one with the installer, or replace the portable `.exe`. Settings and history live in `%APPDATA%\focus-orb` and are kept. With the browser link on, the app rewrites the extension's files on launch and the extension reloads itself once when it sees a newer version. Moving from 1.0.0 needs one manual Reload of the extension in `edge://extensions`.
+**Automatic (installed copy).** Shortly after it starts, and every 4 hours, the installed app asks the public `Nado306/Focus-Orb-releases` repository for a newer version. If there is one, it downloads it in the background and installs it when you quit, or straight away if you choose Restart to update from the orb's menu. It never restarts on its own, so a focus session is never cut short. Settings…, About shows where it stands, with Check now; the switch there turns checking off. This is the only time the app contacts anything beyond your own computer.
+
+Until the app is code-signed, it can't check that an update really came from you: it trusts GitHub's HTTPS and the release page. Signing it closes that gap.
+
+**Releasing a version.** Bump `version` in `package.json`, commit, and push a matching tag (`v1.9.0`). The Windows workflow tests and builds as usual and then publishes the installer, the portable `.exe` and `latest.yml` to `Focus-Orb-releases`. It needs a repository secret, `RELEASES_TOKEN`: a fine-grained GitHub token with Contents: Read and write on `Focus-Orb-releases` only. The source repository stays private.
+
+**By hand.** 
+install the new version over the old one with the installer, or replace the portable `.exe`. Settings and history live in `%APPDATA%\focus-orb` and are kept. With the browser link on, the app rewrites the extension's files on launch and the extension reloads itself once when it sees a newer version. Moving from 1.0.0 needs one manual Reload of the extension in `edge://extensions`.
 
 Edge shows "Disable developer mode extensions" at every launch for any unpacked extension; that can't be switched off. The real fix is publishing the extension to the Edge Add-ons store (unlisted), which needs a pairing step in place of the config file. Not built.
 
@@ -173,7 +180,7 @@ Settings are in `%APPDATA%\focus-orb\settings.json` and session history is in `s
 - The window watcher makes a few read-only Windows calls from inside the app (`winapi.js`): which window is in front, its title, its program, its size. It starts no other process, so there is no hidden PowerShell for security software to flag.
 - Address rules with a path, such as `url:github.com/some-org`, match that site and path only: not another site that mentions it in its address, and not a lookalike such as `evilgithub.com`.
 - The built app has Electron's run-as-Node, `NODE_OPTIONS` and debugger switches turned off. It also checks its own code against a fingerprint baked into the `.exe`, and won't start if that code has been altered.
-- Besides Electron, the app ships one third-party package: koffi (MIT licence, no dependencies of its own), for the window watcher's Windows calls. CSV exports guard against spreadsheet formulas.
+- Besides Electron, the app ships two third-party packages: koffi (MIT licence, no dependencies of its own) for the window watcher's Windows calls, and electron-updater (MIT, from the electron-builder project) for updates. `npm audit --omit=dev` reports nothing against either. CSV exports guard against spreadsheet formulas.
 - The `.exe` isn't code-signed, so Windows SmartScreen warns on first run.
 
 ## How it's put together
@@ -186,6 +193,7 @@ Settings are in `%APPDATA%\focus-orb\settings.json` and session history is in `s
 | `stats.js` | Session history, streaks, aggregates and CSV. Pure logic |
 | `bridge.js`, `extension/` | The browser link: a small localhost listener and the Chrome and Edge extension |
 | `log.js` | The rolling log |
+| `updater.js` | Automatic updates: when to check, and what Settings says |
 | `startup.js` | Start with Windows: reads and writes the start-up entries |
 | `watcher.js`, `winapi.js` | The foreground-window watcher, and the Windows calls it makes |
 | `settings.*`, `profiles.*`, `stats.html`, `stats-ui.js`, `intent.*`, `extension.*`, `preload-*.js` | The profile editor, stats, intent prompt and browser-link windows |

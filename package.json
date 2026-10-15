@@ -1,12 +1,12 @@
 {
   "name": "focus-orb",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "description": "A floating Pomodoro focus orb for Windows",
   "main": "main.js",
   "private": true,
   "scripts": {
     "start": "electron .",
-    "test": "node test/engine.test.js && node test/distraction.test.js && node test/stats.test.js && node test/bridge.test.js && node test/watcher.test.js && node test/startup.test.js && node test/log.test.js && node test/packaging.test.js && node test/main.smoke.test.js && node test/main.smoke.test.js --no-shape",
+    "test": "node test/engine.test.js && node test/distraction.test.js && node test/stats.test.js && node test/bridge.test.js && node test/watcher.test.js && node test/startup.test.js && node test/log.test.js && node test/updater.test.js && node test/packaging.test.js && node test/main.smoke.test.js && node test/main.smoke.test.js --no-shape",
     "dist": "electron-builder --win"
   },
   "devDependencies": {
@@ -35,6 +35,7 @@
       "startup.js",
       "winapi.js",
       "log.js",
+      "updater.js",
       "index.html",
       "style.css",
       "themes-art.css",
@@ -67,7 +68,8 @@
     },
     "nsis": {
       "oneClick": true,
-      "perMachine": false
+      "perMachine": false,
+      "artifactName": "Focus-Orb-Setup-${version}.${ext}"
     },
     "electronFuses": {
       "runAsNode": false,
@@ -77,9 +79,21 @@
       "onlyLoadAppFromAsar": true,
       "enableEmbeddedAsarIntegrityValidation": true
     },
-    "asar": true
+    "asar": true,
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "Nado306",
+        "repo": "Focus-Orb-releases",
+        "releaseType": "release"
+      }
+    ],
+    "portable": {
+      "artifactName": "Focus-Orb-${version}-portable.${ext}"
+    }
   },
   "dependencies": {
+    "electron-updater": "6.8.9",
     "koffi": "3.3.3"
   }
 }

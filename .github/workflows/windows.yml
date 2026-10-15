@@ -8,11 +8,16 @@
 # 5. starts the built app, waits, and reads its log: it must still be running, its
 #    window watcher must be working, and nothing may have been logged as an error
 # 6. keeps both .exe files as downloads on the run's page for 30 days
+# 7. for a version tag (v1.9.0 and so on) only: publishes the installer, the portable
+#    .exe and latest.yml to the public Focus-Orb-releases repository, which is where
+#    installed copies look for updates. The code itself stays private.
 
 name: Windows build
 
 on:
   push:
+    branches: ['**']
+    tags: ['v*']
   pull_request:
   workflow_dispatch:
 
@@ -33,6 +38,13 @@ jobs:
 
       - name: Install
         run: npm ci
+
+      - name: A release tag must match the version in package.json
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        run: |
+          want="v$(node -p "require('./package.json').version")"
+          [ "$want" = "$GITHUB_REF_NAME" ] || { echo "::error::Tag $GITHUB_REF_NAME but package.json says $want"; exit 1; }
 
       - name: Tests
         shell: bash
@@ -85,6 +97,13 @@ jobs:
             Write-Output "::error title=App log (last 40 lines)::$t"
           }
 
+      - name: What was built
+        shell: bash
+        run: |
+          files=$(ls -1 dist | grep -v '^win-unpacked$' | tr '\n' ' ')
+          yml=$( [ -f dist/latest.yml ] && sed -e 's/%/%25/g' dist/latest.yml | awk 'BEGIN{ORS="%0A"} {print}' || echo 'none' )
+          echo "::notice title=Built::${files}%0A%0Alatest.yml:%0A${yml}"
+
       - name: Keep the installers
         uses: actions/upload-artifact@v5
         with:
@@ -92,3 +111,18 @@ jobs:
           path: |
             dist/*.exe
           retention-days: 30
+
+      - name: Publish the release
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.RELEASES_TOKEN }}
+        run: |
+          [ -n "$GH_TOKEN" ] || { echo "::error::No RELEASES_TOKEN secret: see the README, Updates"; exit 1; }
+          v="$GITHUB_REF_NAME"
+          gh release create "$v" \
+            dist/Focus-Orb-Setup-*.exe dist/Focus-Orb-Setup-*.exe.blockmap dist/latest.yml dist/Focus-Orb-*-portable.exe \
+            --repo Nado306/Focus-Orb-releases \
+            --title "Focus Orb ${v#v}" \
+            --notes "Installed copies update themselves. For a fresh install, download Focus-Orb-Setup-${v#v}.exe; the portable copy is Focus-Orb-${v#v}-portable.exe."
+          echo "::notice title=Released::Focus Orb ${v#v} is on the releases page"

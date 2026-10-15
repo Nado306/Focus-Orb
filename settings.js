@@ -99,6 +99,10 @@
     });
 
     fillHideApps(s);
+    $('update-line').textContent = s.updateLine || '';
+    $('update-switch').disabled = !s.canUpdate;
+    $('update-check').hidden = !s.canUpdate || !s.values.autoUpdate || s.updateReady;
+    $('update-install').hidden = !s.updateReady;
     $('version').textContent = `Focus Orb ${s.version}`;
     $('data-path').textContent = `Settings and history: ${s.dataFolder}`;
   }
